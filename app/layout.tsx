@@ -29,6 +29,21 @@ export const metadata: Metadata = {
   ],
 }
 
+const PWAScript = `
+  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/api/sw")
+        .then((registration) => {
+          console.log("[v0] Service Worker registered successfully")
+        })
+        .catch((error) => {
+          console.log("[v0] Service Worker registration skipped:", error?.message)
+        })
+    })
+  }
+`
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,6 +54,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
+        <script dangerouslySetInnerHTML={{ __html: PWAScript }} />
       </head>
       <body className={`${geistSans.className} antialiased`}>{children}</body>
     </html>

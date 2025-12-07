@@ -1,10 +1,13 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Eye, EyeOff, Sparkles, Shield } from "lucide-react"
+import { dataStore } from "@/lib/data-store"
 
 interface LoginScreenProps {
   onLogin: () => void
@@ -12,31 +15,51 @@ interface LoginScreenProps {
 
 export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [credentials, setCredentials] = useState({
-    username: "",
-    password: "",
+    accountNumber: "",
+    pin: "",
   })
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPin, setShowPin] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleLogin = () => {
-    setIsLoading(true)
-    // Simulate login process with enhanced loading
-    setTimeout(() => {
-      setIsLoading(false)
-      onLogin()
-    }, 2000)
+    setError("")
+
+    if (!credentials.accountNumber.trim()) {
+      setError("Account number is required")
+      return
+    }
+    if (credentials.pin.length !== 4 || !/^\d+$/.test(credentials.pin)) {
+      setError("PIN must be exactly 4 digits")
+      return
+    }
+
+    const userData = dataStore.getUserData()
+
+    if (credentials.accountNumber.trim() === userData.accountNumber && credentials.pin === "1234") {
+      setIsLoading(true)
+      setTimeout(() => {
+        setIsLoading(false)
+        onLogin()
+      }, 2000)
+    } else {
+      setError("Invalid account number or PIN")
+    }
+  }
+
+  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 4)
+    setCredentials({ ...credentials, pin: value })
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#004A9F] via-[#0072C6] to-[#00B2A9] flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Animated Background Elements */}
       <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
       <div className="absolute bottom-32 right-8 w-24 h-24 bg-white/5 rounded-full blur-lg animate-bounce"></div>
       <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-white/10 rounded-full blur-md animate-pulse delay-1000"></div>
       <div className="absolute bottom-1/4 left-1/3 w-20 h-20 bg-white/5 rounded-full blur-lg animate-bounce delay-500"></div>
 
       <div className="w-full max-w-sm relative z-10">
-        {/* Enhanced Logo Section */}
         <div className="text-center mb-12">
           <div className="relative inline-block">
             <div className="text-white text-4xl font-bold mb-3 bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
@@ -53,35 +76,42 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           </div>
         </div>
 
-        {/* Enhanced Login Card */}
         <Card className="bg-white/95 backdrop-blur-xl shadow-2xl border-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
           <CardContent className="p-8 space-y-6 relative">
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-gray-800 mb-2">Sign In</h2>
-              <p className="text-gray-600 text-sm">Enter your credentials to continue</p>
+              <p className="text-gray-600 text-sm">Enter your account number and PIN</p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+            )}
 
             <div className="space-y-5">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 mb-2 block">Username</label>
+                <label className="text-sm font-semibold text-gray-700 mb-2 block">Account Number</label>
                 <Input
                   type="text"
-                  placeholder="Enter username"
-                  value={credentials.username}
-                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  placeholder="Enter account number"
+                  value={credentials.accountNumber}
+                  onChange={(e) => {
+                    setCredentials({ ...credentials, accountNumber: e.target.value })
+                    setError("")
+                  }}
                   className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-gray-300"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 mb-2 block">Password</label>
+                <label className="text-sm font-semibold text-gray-700 mb-2 block">4-Digit PIN</label>
                 <div className="relative">
                   <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter password"
-                    value={credentials.password}
-                    onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                    type={showPin ? "text" : "password"}
+                    placeholder="Enter PIN"
+                    value={credentials.pin}
+                    onChange={handlePinChange}
+                    maxLength={4}
                     className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-gray-300 pr-12"
                   />
                   <Button
@@ -89,11 +119,12 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                     variant="ghost"
                     size="icon"
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700 rounded-lg"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowPin(!showPin)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
+                <p className="text-xs text-gray-500">Default PIN for demo: 1234</p>
               </div>
             </div>
 
@@ -117,7 +148,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 variant="link"
                 className="text-[#004A9F] text-sm font-semibold hover:text-[#003875] transition-colors"
               >
-                Forgot Password?
+                Forgot PIN?
               </Button>
               <div className="text-xs text-gray-500 flex items-center justify-center gap-1">
                 Don't have an account?{" "}
@@ -132,13 +163,12 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           </CardContent>
         </Card>
 
-        {/* Enhanced Footer */}
         <div className="text-center mt-8 text-white/70 text-xs space-y-2">
           <div className="flex items-center justify-center gap-2">
             <Shield className="h-3 w-3" />
             <span>Secured by 256-bit SSL encryption</span>
           </div>
-          <div>© 2024 Ecobank. All rights reserved.</div>
+          <div>© 2025 Ecobank. All rights reserved.</div>
         </div>
       </div>
     </div>

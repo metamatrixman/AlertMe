@@ -4,11 +4,11 @@ import { useEffect, useState } from "react"
 import { Loader2, CreditCard, Shield, CheckCircle } from "lucide-react"
 
 interface TransferProcessingScreenProps {
-  onComplete: () => void
+  onNavigate: (screen: string, data?: any) => void
   transferData: any
 }
 
-export function TransferProcessingScreen({ onComplete, transferData }: TransferProcessingScreenProps) {
+export function TransferProcessingScreen({ onNavigate, transferData }: TransferProcessingScreenProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [progress, setProgress] = useState(0)
 
@@ -23,7 +23,9 @@ export function TransferProcessingScreen({ onComplete, transferData }: TransferP
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer)
-          setTimeout(onComplete, 500)
+          setTimeout(() => {
+            onNavigate("transaction-success", transferData)
+          }, 500)
           return 100
         }
         return prev + 2
@@ -44,7 +46,7 @@ export function TransferProcessingScreen({ onComplete, transferData }: TransferP
       clearInterval(timer)
       clearInterval(stepTimer)
     }
-  }, [onComplete, progress, steps.length])
+  }, [onNavigate, progress, steps.length, transferData])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

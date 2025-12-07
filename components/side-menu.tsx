@@ -24,12 +24,13 @@ export function SideMenu({ isOpen, onClose, onNavigate }: SideMenuProps) {
   const menuItems = [
     { icon: Building2, label: "Account", screen: "dashboard" },
     { icon: Send, label: "Send Money", screen: "transfer-options", hasDropdown: true },
-    { icon: ArrowDownToLine, label: "Receive Money", screen: "dashboard" }, // Will show receive functionality
+    { icon: ArrowDownToLine, label: "Add Money", screen: "add-money" },
     { icon: Receipt, label: "Pay Bills", screen: "pay-bills" },
     { icon: CreditCard, label: "Quick Loan", screen: "loans" },
-    { icon: Smartphone, label: "Airtime and Data", screen: "pay-bills" }, // Redirect to bills for airtime
-    { icon: MoreHorizontal, label: "Others", screen: "dashboard" },
+    { icon: Smartphone, label: "Airtime and Data", screen: "pay-bills" },
+    { icon: MoreHorizontal, label: "Virtual Cards", screen: "virtual-cards" },
     { icon: User, label: "Profile", screen: "profile" },
+    { icon: Settings, label: "Settings", screen: "settings" },
   ]
 
   return (
@@ -46,7 +47,14 @@ export function SideMenu({ isOpen, onClose, onNavigate }: SideMenuProps) {
                 <h3 className="font-semibold text-lg">ADEFEMI JOHN OLAYEMI</h3>
                 <p className="text-sm text-gray-600">Last login: June 26, 2023 10:30</p>
               </div>
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  onNavigate("settings")
+                  onClose()
+                }}
+              >
                 <Settings className="h-5 w-5" />
               </Button>
             </div>

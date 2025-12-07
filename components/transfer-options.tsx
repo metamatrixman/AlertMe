@@ -5,58 +5,66 @@ import { ArrowLeft, ArrowLeftRight, Building2, Globe, CreditCard, Smartphone, Ca
 
 interface TransferOptionsProps {
   onBack: () => void
-  onSelect: (option: string) => void
+  onNavigate: (screen: string) => void
 }
 
-export function TransferOptions({ onBack, onSelect }: TransferOptionsProps) {
+export function TransferOptions({ onBack, onNavigate }: TransferOptionsProps) {
   const transferOptions = [
     {
       id: "ecobank-domestic",
       title: "Ecobank Domestic",
       icon: ArrowLeftRight,
       color: "text-[#004A9F]",
+      screen: "new-beneficiary",
     },
     {
       id: "other-banks",
       title: "Other local banks",
       icon: Building2,
       color: "text-[#004A9F]",
+      screen: "new-beneficiary",
     },
     {
       id: "ecobank-africa",
       title: "Ecobank Africa",
       icon: Building2,
       color: "text-[#00B2A9]",
+      screen: "new-beneficiary",
     },
     {
       id: "visa-direct",
       title: "Visa Direct",
       icon: CreditCard,
       color: "text-blue-600",
+      screen: "new-beneficiary",
     },
     {
       id: "mobile-money",
       title: "Mobile money",
       icon: Smartphone,
       color: "text-[#00B2A9]",
+      screen: "new-beneficiary",
     },
     {
       id: "standing-order",
       title: "Standing Order",
       icon: Calendar,
       color: "text-[#004A9F]",
+      screen: "new-beneficiary",
     },
     {
       id: "international",
       title: "International Transfers",
       icon: Globe,
       color: "text-[#004A9F]",
+      screen: "new-beneficiary",
     },
     {
       id: "email-sms",
       title: "Transfer by Email or SMS",
       icon: Send,
       color: "text-[#004A9F]",
+      screen: "new-beneficiary",
     },
   ]
 
@@ -91,7 +99,7 @@ export function TransferOptions({ onBack, onSelect }: TransferOptionsProps) {
                 key={option.id}
                 variant="ghost"
                 className="w-full h-auto p-4 justify-between bg-white hover:bg-gray-50 border border-gray-100"
-                onClick={() => onSelect(option.id)}
+                onClick={() => onNavigate(option.screen)}
               >
                 <div className="flex items-center gap-4">
                   <IconComponent className={`h-6 w-6 ${option.color}`} />

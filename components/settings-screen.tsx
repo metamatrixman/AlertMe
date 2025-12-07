@@ -68,13 +68,13 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
       icon: ArrowDownToLine,
       label: "Request Funds",
       color: "bg-purple-500",
-      onClick: () => {},
+      onClick: () => onNavigate("transfer-options"),
     },
     {
       icon: PiggyBank,
       label: "Savings",
       color: "bg-pink-500",
-      onClick: () => {},
+      onClick: () => console.log("Savings feature coming soon"),
     },
     {
       icon: Network,
@@ -101,7 +101,7 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
       icon: CreditCard,
       label: "Business Card",
       description: "Share contact information",
-      onClick: () => {},
+      onClick: () => console.log("Business card feature coming soon"),
     },
     {
       icon: Receipt,
@@ -128,25 +128,25 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
       icon: Wifi,
       label: "Offline Mode",
       description: "Enable offline functionality",
-      onClick: () => {},
+      onClick: () => console.log("Offline mode coming soon"),
     },
     {
       icon: HelpCircle,
       label: "Support",
       description: "Get help and documentation",
-      onClick: () => {},
+      onClick: () => console.log("Support feature coming soon"),
     },
     {
       icon: Github,
       label: "GitHub",
       description: "View source code",
-      onClick: () => {},
+      onClick: () => window.open("https://github.com/aidigitalcashout-cell/v0-ecobank", "_blank"),
     },
     {
       icon: FileText,
       label: "Documentation",
       description: "User guide and API docs",
-      onClick: () => {},
+      onClick: () => console.log("Documentation coming soon"),
     },
   ]
 

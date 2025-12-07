@@ -23,7 +23,7 @@ import {
 import { dataStore } from "@/lib/data-store"
 
 interface EnhancedDashboardProps {
-  onNavigate: (screen: string) => void
+  onNavigate: (screen: string, id?: string) => void
   onMenuToggle: () => void
 }
 
@@ -47,6 +47,26 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
 
   const formatBalance = (balance: number) => {
     return showBalance ? `₦ ${balance.toLocaleString()}` : "₦ ****"
+  }
+
+  const handleQuickAction = (action: string) => {
+    console.log("[v0] Quick action clicked:", action)
+    if (action === "more") {
+      setIsMoreExpanded(!isMoreExpanded)
+      setShowRecentTransactions(true)
+    } else if (action === "add-money") {
+      onNavigate("add-money")
+    } else if (action === "transfer-options") {
+      onNavigate("transfer-options")
+    } else if (action === "pay-bills") {
+      onNavigate("pay-bills")
+    }
+  }
+
+  const handleAdditionalService = (action: string) => {
+    console.log("[v0] Additional service clicked:", action)
+    onNavigate(action)
+    setIsMoreExpanded(false)
   }
 
   return (
@@ -112,7 +132,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/80 hover:text-white hover:bg-white/10 touch-target"
+                className="p-0 h-auto text-white/80 hover:text-white"
                 onClick={() => onNavigate("transactions")}
               >
                 Transaction history
@@ -162,15 +182,8 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
               <Button
                 variant="outline"
                 size="icon"
-                className="w-12 h-12 rounded-full mb-2 border-2 border-[#004A9F] text-[#004A9F] bg-white hover:bg-[#004A9F] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md touch-target mx-auto"
-                onClick={() => {
-                  if (item.action === "more") {
-                    setIsMoreExpanded(!isMoreExpanded)
-                    setShowRecentTransactions(!isMoreExpanded)
-                  } else {
-                    onNavigate(item.action)
-                  }
-                }}
+                className="w-12 h-12 rounded-full mb-2 border-2 border-[#004A9F] text-[#004A9F] bg-white hover:bg-[#004A9F] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md touch-target mx-auto active:scale-95"
+                onClick={() => handleQuickAction(item.action)}
               >
                 <item.icon className="h-5 w-5" />
               </Button>
@@ -196,8 +209,8 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
                   <Button
                     variant="outline"
                     size="icon"
-                    className="w-12 h-12 rounded-full mb-2 border-2 border-[#004A9F] text-[#004A9F] bg-white hover:bg-[#004A9F] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md touch-target mx-auto"
-                    onClick={() => onNavigate(item.action)}
+                    className="w-12 h-12 rounded-full mb-2 border-2 border-[#004A9F] text-[#004A9F] bg-white hover:bg-[#004A9F] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md touch-target mx-auto active:scale-95"
+                    onClick={() => handleAdditionalService(item.action)}
                   >
                     <item.icon className="h-5 w-5" />
                   </Button>

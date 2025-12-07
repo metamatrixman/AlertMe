@@ -6,26 +6,43 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft, ChevronDown, Home } from "lucide-react"
+import { NIGERIAN_BANKS } from "@/lib/banks-data"
 
 interface NewBeneficiaryProps {
   onBack: () => void
-  onContinue: () => void
+  onNavigate: (screen: string, data?: any) => void
 }
 
-export function NewBeneficiary({ onBack, onContinue }: NewBeneficiaryProps) {
+export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
   const [activeTab, setActiveTab] = useState("New Beneficiary")
   const [formData, setFormData] = useState({
     accountNumber: "",
     bank: "",
+    beneficiaryName: "",
     amount: "",
     remark: "",
     saveAsBeneficiary: true,
   })
 
+  const handleContinue = () => {
+    if (!formData.accountNumber || !formData.bank || !formData.beneficiaryName || !formData.amount) {
+      alert("Please fill in all required fields")
+      return
+    }
+
+    onNavigate("transfer", {
+      accountNumber: formData.accountNumber,
+      bank: formData.bank,
+      beneficiaryName: formData.beneficiaryName,
+      amount: formData.amount,
+      remark: formData.remark,
+    })
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
-      <div className="bg-white px-4 py-4 flex items-center justify-between border-b">
+      <div className="bg-white px-4 py-4 flex items-center justify-between border-b sticky top-0 z-10">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -71,6 +88,32 @@ export function NewBeneficiary({ onBack, onContinue }: NewBeneficiaryProps) {
           </div>
         </div>
 
+        {/* Bank */}
+        <div>
+          <label className="text-sm font-medium text-gray-700 mb-2 block">Bank</label>
+          <Select value={formData.bank} onValueChange={(value) => setFormData({ ...formData, bank: value })}>
+            <SelectTrigger className="bg-white">
+              <SelectValue placeholder="Select bank" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50">Traditional Banks</div>
+              {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
+                <SelectItem key={bank.code} value={bank.name}>
+                  {bank.name}
+                </SelectItem>
+              ))}
+              <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50 mt-2">
+                Digital Wallets & Fintech
+              </div>
+              {NIGERIAN_BANKS.filter((bank) => bank.type === "wallet").map((bank) => (
+                <SelectItem key={bank.code} value={bank.name}>
+                  {bank.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Account Number */}
         <div>
           <label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</label>
@@ -82,20 +125,15 @@ export function NewBeneficiary({ onBack, onContinue }: NewBeneficiaryProps) {
           />
         </div>
 
-        {/* Bank */}
+        {/* Beneficiary Name */}
         <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Bank</label>
-          <Select value={formData.bank} onValueChange={(value) => setFormData({ ...formData, bank: value })}>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Select bank" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="first-bank">First Bank</SelectItem>
-              <SelectItem value="gtbank">GTBank</SelectItem>
-              <SelectItem value="access-bank">Access Bank</SelectItem>
-              <SelectItem value="zenith-bank">Zenith Bank</SelectItem>
-            </SelectContent>
-          </Select>
+          <label className="text-sm font-medium text-gray-700 mb-2 block">Beneficiary Name</label>
+          <Input
+            placeholder="Enter beneficiary name"
+            value={formData.beneficiaryName}
+            onChange={(e) => setFormData({ ...formData, beneficiaryName: e.target.value })}
+            className="bg-white"
+          />
         </div>
 
         {/* Amount */}
@@ -106,6 +144,7 @@ export function NewBeneficiary({ onBack, onContinue }: NewBeneficiaryProps) {
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
             className="bg-white"
+            type="number"
           />
         </div>
 
@@ -135,7 +174,10 @@ export function NewBeneficiary({ onBack, onContinue }: NewBeneficiaryProps) {
 
       {/* Continue Button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
-        <Button onClick={onContinue} className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3 rounded-full">
+        <Button
+          onClick={handleContinue}
+          className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3 rounded-full"
+        >
           Continue
         </Button>
       </div>

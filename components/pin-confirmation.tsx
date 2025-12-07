@@ -6,10 +6,11 @@ import { ArrowLeft, ChevronDown, Delete } from "lucide-react"
 
 interface PinConfirmationProps {
   onBack: () => void
-  onSubmit: () => void
+  onNavigate: (screen: string, data?: any) => void
+  transferData?: any
 }
 
-export function PinConfirmation({ onBack, onSubmit }: PinConfirmationProps) {
+export function PinConfirmation({ onBack, onNavigate, transferData }: PinConfirmationProps) {
   const [pin, setPin] = useState("")
 
   const handleNumberPress = (num: string) => {
@@ -24,7 +25,7 @@ export function PinConfirmation({ onBack, onSubmit }: PinConfirmationProps) {
 
   const handleSubmit = () => {
     if (pin.length === 4) {
-      onSubmit()
+      onNavigate("transfer-processing", transferData)
     }
   }
 
@@ -43,7 +44,7 @@ export function PinConfirmation({ onBack, onSubmit }: PinConfirmationProps) {
       <div className="px-4 py-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">From</span>
-          <Button variant="link" className="text-red-500 text-sm p-0">
+          <Button variant="link" className="text-red-500 text-sm p-0" onClick={onBack}>
             Cancel
           </Button>
         </div>

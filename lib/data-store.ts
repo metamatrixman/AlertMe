@@ -81,6 +81,8 @@ interface AppState {
   notifications: Notification[]
   loanApplications: LoanApplication[]
   settings: AppSettings
+  lastSynced: string
+  version: number
 }
 
 class DataStore {
@@ -88,6 +90,9 @@ class DataStore {
   private state: AppState
   private listeners: Set<() => void> = new Set()
   private readonly STORAGE_KEY = "ecobank_app_data"
+  private readonly BACKUP_KEY = "ecobank_app_backup"
+  private readonly VERSION = 1
+  private saveTimeout: NodeJS.Timeout | null = null
 
   static getInstance(): DataStore {
     if (!DataStore.instance) {
@@ -100,11 +105,16 @@ class DataStore {
     this.state = this.loadFromStorage()
     this.initializeDefaultData()
 
-    // Auto-save every 5 seconds
-    setInterval(() => this.saveToStorage(), 5000)
-
-    // Save on page unload
+    // Initialize IndexedDB for better scalability
     if (typeof window !== "undefined") {
+      StorageManager.initIndexedDB().catch((err) => console.warn("IndexedDB initialization failed:", err))
+
+      // Request persistent storage quota
+      StorageManager.requestPersistentStorage().catch((err) =>
+        console.warn("Failed to request persistent storage:", err),
+      )
+
+      // Auto-save with debouncing
       window.addEventListener("beforeunload", () => this.saveToStorage())
     }
   }
@@ -181,15 +191,53 @@ class DataStore {
         biometricLogin: false,
         language: "en",
       },
+      lastSynced: new Date().toISOString(),
+      version: this.VERSION,
     }
   }
 
   private loadFromStorage(): AppState {
-    return StorageManager.load(this.STORAGE_KEY, this.getDefaultState())
+    try {
+      const stored = StorageManager.loadSync(this.STORAGE_KEY, null)
+      if (stored) {
+        // Validate version and migrate if needed
+        if (stored.version !== this.VERSION) {
+          console.log("Data version mismatch, performing migration")
+          return this.migrateData(stored)
+        }
+        return stored
+      }
+    } catch (error) {
+      console.error("Failed to load from storage:", error)
+    }
+    return this.getDefaultState()
+  }
+
+  private migrateData(oldState: any): AppState {
+    // Handle data migrations between versions here
+    const newState = this.getDefaultState()
+    if (oldState.userData) {
+      newState.userData = { ...newState.userData, ...oldState.userData }
+    }
+    if (oldState.transactions) {
+      newState.transactions = oldState.transactions
+    }
+    if (oldState.beneficiaries) {
+      newState.beneficiaries = oldState.beneficiaries
+    }
+    newState.version = this.VERSION
+    return newState
   }
 
   private saveToStorage(): void {
-    StorageManager.save(this.STORAGE_KEY, this.state)
+    try {
+      this.state.lastSynced = new Date().toISOString()
+      StorageManager.saveSync(this.STORAGE_KEY, this.state)
+
+      this.createAutoBackup()
+    } catch (error) {
+      console.error("Failed to save to storage:", error)
+    }
   }
 
   private initializeDefaultData(): void {
@@ -208,7 +256,9 @@ class DataStore {
 
   private notify() {
     this.listeners.forEach((listener) => listener())
-    this.saveToStorage() // Auto-save on every change
+
+    if (this.saveTimeout) clearTimeout(this.saveTimeout)
+    this.saveTimeout = setTimeout(() => this.saveToStorage(), 2000)
   }
 
   // User data methods
@@ -411,18 +461,60 @@ class DataStore {
   }
 
   exportData(): string {
-    return JSON.stringify(this.state, null, 2)
+    return JSON.stringify(
+      {
+        data: this.state,
+        timestamp: new Date().toISOString(),
+        version: this.VERSION,
+      },
+      null,
+      2,
+    )
   }
 
-  importData(jsonData: string): boolean {
+  async importData(jsonData: string): Promise<boolean> {
     try {
-      const importedState = JSON.parse(jsonData) as AppState
-      this.state = importedState
+      const importedData = JSON.parse(jsonData)
+
+      if (importedData.version !== this.VERSION) {
+        console.warn("Imported data version mismatch, attempting migration")
+        importedData.data = this.migrateData(importedData.data)
+      }
+
+      this.state = importedData.data
       this.notify()
       return true
     } catch (error) {
       console.error("Failed to import data:", error)
       return false
+    }
+  }
+
+  async restoreFromBackup(): Promise<boolean> {
+    try {
+      const backup = StorageManager.loadSync(this.BACKUP_KEY, null)
+      if (!backup) return false
+
+      this.state = backup.data
+      this.notify()
+      return true
+    } catch (error) {
+      console.error("Failed to restore from backup:", error)
+      return false
+    }
+  }
+
+  getStorageStats(): {
+    totalTransactions: number
+    totalBeneficiaries: number
+    currentBalance: number
+    lastSynced: string
+  } {
+    return {
+      totalTransactions: this.state.transactions.length,
+      totalBeneficiaries: this.state.beneficiaries.length,
+      currentBalance: this.state.userData.balance,
+      lastSynced: this.state.lastSynced,
     }
   }
 
@@ -454,6 +546,19 @@ class DataStore {
   // Method to check if account exists
   hasExistingAccount(): boolean {
     return this.state.userData.accountNumber !== ""
+  }
+
+  private createAutoBackup(): void {
+    try {
+      const backup = {
+        data: this.state,
+        timestamp: new Date().toISOString(),
+        version: this.VERSION,
+      }
+      StorageManager.saveSync(this.BACKUP_KEY, backup)
+    } catch (error) {
+      console.warn("Failed to create backup:", error)
+    }
   }
 }
 

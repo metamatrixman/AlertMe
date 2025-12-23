@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useStorageInit } from "@/hooks/use-storage-init"
 import { SplashScreen } from "@/components/splash-screen"
 import { LoginScreen } from "@/components/login-screen"
 import { EnhancedDashboard } from "@/components/enhanced-dashboard"
@@ -32,6 +33,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { dataStore } from "@/lib/data-store"
 
 export default function Home() {
+  useStorageInit()
+
   const [currentScreen, setCurrentScreen] = useState("splash")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [transferData, setTransferData] = useState<any>(null)
@@ -39,7 +42,6 @@ export default function Home() {
   useEffect(() => {
     const hasAccount = dataStore.hasExistingAccount()
     if (!hasAccount) {
-      // If no account, will show registration through login screen
       setCurrentScreen("login")
     }
   }, [])

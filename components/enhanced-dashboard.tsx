@@ -51,6 +51,8 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
   }
 
   const handleQuickAction = (action: string) => {
+    console.log("[v0] Quick action triggered:", action)
+
     if (action === "more") {
       setShowRecentTransactions(false)
       setIsMoreExpanded(!isMoreExpanded)
@@ -60,10 +62,19 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
       onNavigate("transfer-options")
     } else if (action === "pay-bills") {
       onNavigate("pay-bills")
+    } else {
+      console.warn("[v0] Unknown quick action:", action)
     }
   }
 
   const handleAdditionalService = (action: string) => {
+    console.log("[v0] Additional service action:", action)
+
+    if (!action) {
+      console.error("[v0] No action specified for additional service")
+      return
+    }
+
     onNavigate(action)
     setIsMoreExpanded(false)
   }

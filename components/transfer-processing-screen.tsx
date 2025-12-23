@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Loader2, CreditCard, Shield, CheckCircle } from "lucide-react"
+import { dataStore } from "@/lib/data-store"
 
 interface TransferProcessingScreenProps {
   onNavigate: (screen: string, data?: any) => void
@@ -19,16 +20,39 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
   ]
 
   useEffect(() => {
+    console.log("[v0] Transfer processing started with data:", transferData)
+
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer)
-          setTimeout(() => {
-            onNavigate("transaction-success", {
-              ...transferData,
-              beneficiaryName: transferData?.beneficiaryName || "Recipient",
-            })
-          }, 500)
+
+          if (transferData) {
+            dataStore
+              .addTransaction({
+                type: `Transfer to ${transferData.bank}`,
+                amount: Number.parseFloat(transferData.amount || "0"),
+                recipient: transferData.beneficiaryName || "Recipient",
+                description: `Transfer to ${transferData.beneficiaryName}`,
+                status: "Successful",
+                isDebit: true,
+                section: "Today",
+                recipientBank: transferData.bank,
+                recipientAccount: transferData.accountNumber,
+                fee: 30,
+              })
+              .then((id) => {
+                console.log("[v0] Transaction added with ID:", id)
+                setTimeout(() => {
+                  onNavigate("transaction-success", {
+                    ...transferData,
+                    id,
+                    beneficiaryName: transferData?.beneficiaryName || "Recipient",
+                    timestamp: new Date().toISOString(),
+                  })
+                }, 500)
+              })
+          }
           return 100
         }
         return prev + 2
@@ -104,7 +128,7 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
             <div className="text-2xl font-bold text-[#004A9F]">
               ₦ {Number.parseFloat(transferData?.amount || "0").toLocaleString()}
             </div>
-            <div className="text-sm text-gray-600">to {transferData?.beneficiaryName}</div>
+            <div className="text-sm text-gray-600">to {transferData?.beneficiaryName || "Recipient"}</div>
           </div>
 
           <div className="space-y-2 text-sm">

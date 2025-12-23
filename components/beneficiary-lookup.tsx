@@ -34,14 +34,20 @@ export function BeneficiaryLookup({
     setError(null)
     setLookupAttempted(true)
 
+    const trimmedAccountNumber = accountNumber.trim()
+
     const lookupTimer = setTimeout(() => {
-      const beneficiary = dataStore.findBeneficiaryByAccount(accountNumber.trim())
+      console.log("[v0] Searching for beneficiary with account:", trimmedAccountNumber)
+
+      const beneficiary = dataStore.findBeneficiaryByAccount(trimmedAccountNumber)
 
       if (beneficiary) {
+        console.log("[v0] Beneficiary found:", beneficiary.name)
         setFoundName(beneficiary.name)
         onBeneficiaryFound(beneficiary.name)
         setError(null)
       } else {
+        console.log("[v0] No beneficiary found for account:", trimmedAccountNumber)
         setFoundName(null)
         setError("Unable to fetch name provide account name")
       }

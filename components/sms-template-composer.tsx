@@ -169,11 +169,13 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
     { key: "transaction_type", label: "Transaction Type" },
   ]
 
-  const filteredTemplates = templates.filter((t) => {
-    const bankMatch = selectedBank === "all" || t.bank === selectedBank
-    const typeMatch = selectedType === "all" || t.type === selectedType
-    return bankMatch && typeMatch
-  })
+  const filteredTemplates = Array.isArray(templates)
+    ? templates.filter((t) => {
+        const bankMatch = selectedBank === "all" || t.bank === selectedBank
+        const typeMatch = selectedType === "all" || t.type === selectedType
+        return bankMatch && typeMatch
+      })
+    : []
 
   const banks = NIGERIAN_BANKS.filter((b) => b.type === "bank")
   const wallets = NIGERIAN_BANKS.filter((b) => b.type === "wallet")

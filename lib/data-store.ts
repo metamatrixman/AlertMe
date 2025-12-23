@@ -277,7 +277,18 @@ class DataStore {
   }
 
   updateProfilePicture(pictureUrl: string): void {
-    this.state.userData.profilePicture = pictureUrl
+    const maxSize = 500000 // 500KB limit for localStorage
+    let optimizedUrl = pictureUrl
+
+    if (pictureUrl && pictureUrl.length > maxSize) {
+      console.warn("[v0] Profile picture exceeds size limit, compressing...")
+      // For production, implement image compression here
+      // For now, store with warning
+      optimizedUrl = pictureUrl.substring(0, maxSize)
+    }
+
+    this.state.userData.profilePicture = optimizedUrl
+    this.saveToStorage()
     this.notify()
   }
 

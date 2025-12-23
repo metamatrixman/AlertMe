@@ -31,6 +31,7 @@ import { DetailedReceiptScreen } from "@/components/detailed-receipt-screen"
 import { UpgradeLimitScreen } from "@/components/upgrade-limit-screen"
 import { Toaster } from "@/components/ui/toaster"
 import { dataStore } from "@/lib/data-store"
+import { LoanRequirementsChecklist } from "@/components/loan-requirements-checklist"
 
 export default function Home() {
   useStorageInit()
@@ -96,6 +97,8 @@ export default function Home() {
         return <ReceiptGenerator onBack={handleBack} />
       case "loans":
         return <EnhancedLoansScreen onBack={handleBack} onNavigate={handleNavigate} />
+      case "loan-requirements":
+        return <LoanRequirementsChecklist onBack={handleBack} />
       case "pay-bills":
         return <PayBillsScreen onBack={handleBack} onNavigate={handleNavigate} />
       case "pos":

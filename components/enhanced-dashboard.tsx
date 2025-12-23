@@ -19,6 +19,7 @@ import {
   Settings,
   Smartphone,
   Globe,
+  ChevronDown,
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 
@@ -52,8 +53,8 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
   const handleQuickAction = (action: string) => {
     console.log("[v0] Quick action clicked:", action)
     if (action === "more") {
+      setShowRecentTransactions(false)
       setIsMoreExpanded(!isMoreExpanded)
-      setShowRecentTransactions(true)
     } else if (action === "add-money") {
       onNavigate("add-money")
     } else if (action === "transfer-options") {
@@ -222,7 +223,6 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
         </div>
       )}
 
-      {/* Recent Transactions - Collapsible */}
       <div className="px-4 mb-24 animate-fade-in" style={{ animationDelay: "0.2s" }}>
         {showRecentTransactions ? (
           <div>
@@ -290,7 +290,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
           </div>
         ) : (
           <div
-            className="bg-white rounded-lg p-4 card-shadow-sm cursor-pointer hover:shadow-md transition-shadow border border-gray-100 touch-target"
+            className="bg-white rounded-lg p-4 card-shadow-sm cursor-pointer hover:shadow-md transition-all duration-300 border border-gray-100 touch-target active:scale-95"
             onClick={() => {
               setShowRecentTransactions(true)
               setIsMoreExpanded(false)
@@ -298,7 +298,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
           >
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
-              <span className="text-sm text-gray-600">Click to expand</span>
+              <ChevronDown className="h-5 w-5 text-[#004A9F]" />
             </div>
           </div>
         )}

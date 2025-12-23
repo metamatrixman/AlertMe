@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Home, Plus, FileText } from "lucide-react"
+import { ArrowLeft, Home, Plus, FileText, ClipboardList } from "lucide-react"
 import { dataStore, type LoanApplication } from "@/lib/data-store"
 
 interface EnhancedLoansScreenProps {
@@ -136,6 +136,14 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
       </div>
 
       <div className="px-4 py-6 space-y-6">
+        <Button
+          onClick={() => onNavigate("loan-requirements")}
+          className="w-full bg-[#A4D233] hover:bg-[#8BC220] text-black py-3 flex items-center justify-center gap-2"
+        >
+          <ClipboardList className="h-4 w-4" />
+          Review Loan Requirements
+        </Button>
+
         {/* Loan Applications */}
         {loanApplications.length > 0 && (
           <Card>

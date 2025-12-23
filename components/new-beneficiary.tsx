@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft, ChevronDown, Home } from "lucide-react"
 import { NIGERIAN_BANKS } from "@/lib/banks-data"
+import { BeneficiaryLookup } from "@/components/beneficiary-lookup"
+import { dataStore } from "@/lib/data-store"
 
 interface NewBeneficiaryProps {
   onBack: () => void
@@ -24,10 +26,26 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
     saveAsBeneficiary: true,
   })
 
+  const handleBeneficiaryFound = (name: string) => {
+    setFormData({ ...formData, beneficiaryName: name })
+  }
+
+  const handleAccountNumberChange = (value: string) => {
+    setFormData({ ...formData, accountNumber: value })
+  }
+
   const handleContinue = () => {
     if (!formData.accountNumber || !formData.bank || !formData.beneficiaryName || !formData.amount) {
       alert("Please fill in all required fields")
       return
+    }
+
+    if (formData.saveAsBeneficiary) {
+      dataStore.addBeneficiary({
+        name: formData.beneficiaryName,
+        accountNumber: formData.accountNumber,
+        bank: formData.bank,
+      })
     }
 
     onNavigate("transfer", {
@@ -114,22 +132,17 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
           </Select>
         </div>
 
-        {/* Account Number */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</label>
-          <Input
-            placeholder="Enter account number"
-            value={formData.accountNumber}
-            onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
-            className="bg-white"
-          />
-        </div>
+        <BeneficiaryLookup
+          accountNumber={formData.accountNumber}
+          onBeneficiaryFound={handleBeneficiaryFound}
+          onAccountNumberChange={handleAccountNumberChange}
+        />
 
-        {/* Beneficiary Name */}
+        {/* Beneficiary Name (can be edited if lookup fails) */}
         <div>
           <label className="text-sm font-medium text-gray-700 mb-2 block">Beneficiary Name</label>
           <Input
-            placeholder="Enter beneficiary name"
+            placeholder="Enter or confirm beneficiary name"
             value={formData.beneficiaryName}
             onChange={(e) => setFormData({ ...formData, beneficiaryName: e.target.value })}
             className="bg-white"

@@ -325,8 +325,8 @@ class DataStore {
   }
 
   async addTransaction(transaction: Omit<Transaction, "id" | "reference">): Promise<string> {
-    const id = Date.now().toString()
-    const reference = `TXN${id}`
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const reference = `TXN${Date.now().toString().slice(-9)}`
 
     const newTransaction: Transaction = {
       ...transaction,
@@ -402,7 +402,7 @@ class DataStore {
   }
 
   addBeneficiary(beneficiary: Omit<Beneficiary, "id">): string {
-    const id = Date.now().toString()
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     this.state.beneficiaries.push({ ...beneficiary, id })
     this.notify()
     return id
@@ -416,7 +416,7 @@ class DataStore {
   }
 
   addNotification(notification: Omit<Notification, "id" | "timestamp" | "read">): void {
-    const id = Date.now().toString()
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     this.state.notifications.unshift({
       ...notification,
       id,
@@ -444,7 +444,7 @@ class DataStore {
   }
 
   addLoanApplication(application: Omit<LoanApplication, "id" | "applicationDate">): string {
-    const id = Date.now().toString()
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     const newApplication: LoanApplication = {
       ...application,
       id,

@@ -1,10 +1,9 @@
 "use client"
 
-import { memo } from \"react\"
-import { Button } from \"@/components/ui/button\"
-import { ArrowLeft, Check, Share } from \"lucide-react\"
-import { useEffect } from \"react\"
-import { dataStore } from \"@/lib/data-store\"
+import { memo, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft, Check, Share } from "lucide-react"
+import { dataStore } from "@/lib/data-store"
 
 interface TransactionSuccessProps {
   onNavigate: (screen: string, data?: any) => void

@@ -1,7 +1,10 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { dataStore } from "@/lib/data-store"
+import { StorageManager } from "@/lib/storage-manager"
 import {
   Building2,
   Send,
@@ -21,6 +24,38 @@ interface SideMenuProps {
 }
 
 export function SideMenu({ isOpen, onClose, onNavigate }: SideMenuProps) {
+  const [userData, setUserData] = useState(dataStore.getUserData())
+  const [profilePicture, setProfilePicture] = useState<string | undefined>(userData.profilePicture)
+
+  // Subscribe to data store changes
+  useEffect(() => {
+    const unsubscribe = dataStore.subscribe(() => {
+      const updatedData = dataStore.getUserData()
+      setUserData(updatedData)
+      setProfilePicture(updatedData.profilePicture)
+    })
+
+    return unsubscribe
+  }, [])
+
+  // Load profile picture from IndexedDB if available
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      try {
+        const idbPicture = await StorageManager.load<string>("ecobank_profile_picture", "")
+        if (idbPicture && !profilePicture) {
+          setProfilePicture(idbPicture)
+        }
+      } catch (error) {
+        console.warn("[v0] Failed to load profile picture from IndexedDB:", error)
+      }
+    }
+
+    if (!profilePicture) {
+      loadProfilePicture()
+    }
+  }, [profilePicture])
+
   const menuItems = [
     { icon: Building2, label: "Account", screen: "dashboard" },
     { icon: Send, label: "Send Money", screen: "transfer-options", hasDropdown: true },
@@ -36,28 +71,47 @@ export function SideMenu({ isOpen, onClose, onNavigate }: SideMenuProps) {
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="left" className="w-80 p-0">
+        <SheetTitle className="sr-only">Menu</SheetTitle>
         <div className="bg-white h-full">
           {/* Profile Section */}
           <div className="p-6 border-b">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-full bg-orange-500 flex items-center justify-center">
-                <span className="text-white text-xl font-bold">A</span>
+            <button
+              onClick={() => {
+                onNavigate("profile")
+                onClose()
+              }}
+              className="w-full text-left hover:opacity-80 transition-opacity"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white">
+                  {profilePicture ? (
+                    <img
+                      src={profilePicture}
+                      alt={userData.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-xl font-bold">{userData.name.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg text-gray-900 truncate">{userData.name.toUpperCase()}</h3>
+                  <p className="text-sm text-gray-600 truncate">{userData.email}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onNavigate("settings")
+                    onClose()
+                  }}
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">ADEFEMI JOHN OLAYEMI</h3>
-                <p className="text-sm text-gray-600">Last login: June 26, 2023 10:30</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  onNavigate("settings")
-                  onClose()
-                }}
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
-            </div>
+            </button>
           </div>
 
           {/* Menu Items */}

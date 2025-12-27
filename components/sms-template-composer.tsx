@@ -124,7 +124,7 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
 
   // Load templates from storage on mount
   useEffect(() => {
-    const savedTemplates = StorageManager.load<SMSTemplate[]>(STORAGE_KEY, [])
+    const savedTemplates = StorageManager.loadSync<SMSTemplate[]>(STORAGE_KEY, [])
     if (savedTemplates.length === 0) {
       const defaultTemplates = generateBankTemplates()
       setTemplates(defaultTemplates)
@@ -133,7 +133,7 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
       setTemplates(savedTemplates)
     }
 
-    const savedCard = StorageManager.load<BusinessCardData>(BUSINESS_CARD_KEY, {
+    const savedCard = StorageManager.loadSync<BusinessCardData>(BUSINESS_CARD_KEY, {
       sender: dataStore.getUserData().name,
       accountNumber: dataStore.getUserData().accountNumber,
       bank: "Ecobank Nigeria",

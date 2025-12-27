@@ -130,10 +130,10 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
       </div>
 
       {/* Account Balance Card */}
-      <div className="px-4 mb-6 animate-fade-in">
-        <Card className="gradient-primary text-white premium-shadow border-0 overflow-hidden">
+      <div className="px-4 mb-6">
+        <Card className="gradient-primary text-white premium-shadow border-0 overflow-hidden relative">
           {/* Decorative background element */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl"></div>
           </div>
           <CardContent className="p-6 relative z-10">
@@ -181,7 +181,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
       {/* Quick Transaction */}
       <div className="px-4 mb-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-900">QUICK TRANSACTION</h3>
-        <div className="grid grid-cols-4 gap-3 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="grid grid-cols-4 gap-3">
           {[
             { label: "Add Money", icon: ArrowDownToLine, action: "add-money" },
             { label: "Send Money", icon: ArrowUpFromLine, action: "transfer-options" },
@@ -205,7 +205,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
 
       {/* Expandable More Section */}
       {isMoreExpanded && (
-        <div className="px-4 mb-6 animate-scale-in">
+        <div className="px-4 mb-6">
           <div className="bg-white rounded-lg p-4 card-shadow border border-gray-100">
             <h4 className="text-sm font-semibold mb-3 text-gray-900">Additional Services</h4>
             <div className="grid grid-cols-4 gap-3">
@@ -232,7 +232,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
         </div>
       )}
 
-      <div className="px-4 mb-24 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+      <div className="px-4 mb-24">
         {showRecentTransactions ? (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -252,7 +252,6 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
                   key={transaction.id}
                   className="flex items-center justify-between p-4 bg-white rounded-lg card-shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer hover:border-gray-200 touch-target"
                   onClick={() => onNavigate("transaction-detail", transaction.id)}
-                  style={{ animationDelay: `${idx * 0.05}s` }}
                 >
                   <div className="flex items-center gap-3 flex-1">
                     <div

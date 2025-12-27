@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ChevronDown, Delete } from "lucide-react"
 
@@ -10,7 +11,7 @@ interface PinConfirmationProps {
   transferData?: any
 }
 
-export function PinConfirmation({ onBack, onNavigate, transferData }: PinConfirmationProps) {
+function PinConfirmationComponent({ onBack, onNavigate, transferData }: PinConfirmationProps) {
   const [pin, setPin] = useState("")
 
   const handleNumberPress = (num: string) => {
@@ -110,3 +111,5 @@ export function PinConfirmation({ onBack, onNavigate, transferData }: PinConfirm
     </div>
   )
 }
+
+export const PinConfirmation = memo(PinConfirmationComponent)

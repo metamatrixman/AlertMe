@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ChevronDown, Home } from "lucide-react"
 
@@ -9,7 +10,7 @@ interface TransferScreenProps {
   transferData?: any
 }
 
-export function TransferScreen({ onBack, onNavigate, transferData }: TransferScreenProps) {
+function TransferScreenComponent({ onBack, onNavigate, transferData }: TransferScreenProps) {
   const handleContinue = () => {
     onNavigate("pin-confirmation", transferData)
   }
@@ -80,3 +81,5 @@ export function TransferScreen({ onBack, onNavigate, transferData }: TransferScr
     </div>
   )
 }
+
+export const TransferScreen = memo(TransferScreenComponent)

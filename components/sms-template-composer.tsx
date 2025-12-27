@@ -169,7 +169,7 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
     { key: "transaction_type", label: "Transaction Type" },
   ]
 
-  const filteredTemplates = Array.isArray(templates)
+  const filteredTemplates = (Array.isArray(templates) && templates.length > 0)
     ? templates.filter((t) => {
         const bankMatch = selectedBank === "all" || t.bank === selectedBank
         const typeMatch = selectedType === "all" || t.type === selectedType

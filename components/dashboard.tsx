@@ -105,6 +105,7 @@ export function Dashboard({ onNavigate, onMenuToggle }: DashboardProps) {
               variant="outline"
               size="icon"
               className="w-12 h-12 rounded-full mb-2 border-[#004A9F] text-[#004A9F] bg-transparent"
+              onClick={() => onNavigate("add-funds")}
             >
               <ArrowDownToLine className="h-5 w-5" />
             </Button>

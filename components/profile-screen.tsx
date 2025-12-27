@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Camera, Edit, Save, X } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { StorageManager } from "@/lib/storage-manager"
 
 interface ProfileScreenProps {
   onBack: () => void
@@ -20,6 +21,24 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [profile, setProfile] = useState(dataStore.getUserData())
   const [editedProfile, setEditedProfile] = useState(profile)
+
+  // Load profile picture from IndexedDB if it exists
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      try {
+        const idbPicture = await StorageManager.load<string>("ecobank_profile_picture", "")
+        if (idbPicture && !profile.profilePicture) {
+          const updatedProfile = { ...profile, profilePicture: idbPicture }
+          setProfile(updatedProfile)
+          setEditedProfile(updatedProfile)
+        }
+      } catch (error) {
+        console.warn("[v0] Failed to load profile picture from IndexedDB:", error)
+      }
+    }
+
+    loadProfilePicture()
+  }, [])
 
   const handleProfilePictureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

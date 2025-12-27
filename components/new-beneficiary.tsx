@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, ChevronDown, Home } from "lucide-react"
+import { ArrowLeft, ChevronDown, Home, AlertCircle } from "lucide-react"
 import { NIGERIAN_BANKS } from "@/lib/banks-data"
 import { BeneficiaryLookup } from "@/components/beneficiary-lookup"
 import { dataStore } from "@/lib/data-store"
@@ -13,6 +13,13 @@ import { dataStore } from "@/lib/data-store"
 interface NewBeneficiaryProps {
   onBack: () => void
   onNavigate: (screen: string, data?: any) => void
+}
+
+interface FormErrors {
+  accountNumber?: string
+  bank?: string
+  amount?: string
+  beneficiaryName?: string
 }
 
 export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
@@ -25,18 +32,56 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
     remark: "",
     saveAsBeneficiary: true,
   })
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [isValidating, setIsValidating] = useState(false)
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
+
+    if (!formData.accountNumber?.trim()) {
+      newErrors.accountNumber = "Account number is required"
+    } else if (formData.accountNumber.length < 10) {
+      newErrors.accountNumber = "Account number must be at least 10 digits"
+    } else if (!/^\d+$/.test(formData.accountNumber)) {
+      newErrors.accountNumber = "Account number must contain only digits"
+    }
+
+    if (!formData.bank?.trim()) {
+      newErrors.bank = "Please select a bank"
+    }
+
+    if (!formData.beneficiaryName?.trim()) {
+      newErrors.beneficiaryName = "Beneficiary name is required"
+    }
+
+    if (!formData.amount?.trim()) {
+      newErrors.amount = "Amount is required"
+    } else if (isNaN(Number(formData.amount)) || Number(formData.amount) <= 0) {
+      newErrors.amount = "Amount must be a valid positive number"
+    } else if (Number(formData.amount) > 10000000) {
+      newErrors.amount = "Amount exceeds maximum limit of ₦10,000,000"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleBeneficiaryFound = (name: string) => {
     setFormData({ ...formData, beneficiaryName: name })
+    setErrors({ ...errors, beneficiaryName: undefined })
   }
 
   const handleAccountNumberChange = (value: string) => {
     setFormData({ ...formData, accountNumber: value })
+    if (errors.accountNumber) {
+      setErrors({ ...errors, accountNumber: undefined })
+    }
   }
 
   const handleContinue = () => {
-    if (!formData.accountNumber || !formData.bank || !formData.beneficiaryName || !formData.amount) {
-      alert("Please fill in all required fields")
+    setIsValidating(true)
+    if (!validateForm()) {
+      setIsValidating(false)
       return
     }
 
@@ -48,6 +93,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
       })
     }
 
+    setIsValidating(false)
     onNavigate("transfer", {
       accountNumber: formData.accountNumber,
       bank: formData.bank,
@@ -91,7 +137,17 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
 
       {/* Form */}
       <div className="px-4 py-6 space-y-6">
-        {/* From Account */}
+        {/* Error Display */}
+        {Object.keys(errors).length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-red-700">
+              {Object.values(errors)[0]}
+            </div>
+          </div>
+        )}
+
+        {/* From Account */}}
         <div>
           <label className="text-sm font-medium text-gray-700 mb-2 block">From account</label>
           <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
@@ -109,8 +165,11 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
         {/* Bank */}
         <div>
           <label className="text-sm font-medium text-gray-700 mb-2 block">Bank</label>
-          <Select value={formData.bank} onValueChange={(value) => setFormData({ ...formData, bank: value })}>
-            <SelectTrigger className="bg-white">
+          <Select value={formData.bank} onValueChange={(value) => {
+            setFormData({ ...formData, bank: value })
+            if (errors.bank) setErrors({ ...errors, bank: undefined })
+          }}>
+            <SelectTrigger className={`bg-white ${errors.bank ? "border-red-500" : ""}`}>
               <SelectValue placeholder="Select bank" />
             </SelectTrigger>
             <SelectContent className="max-h-60">
@@ -130,13 +189,29 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
               ))}
             </SelectContent>
           </Select>
+          {errors.bank && (
+            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {errors.bank}
+            </p>
+          )}
         </div>
 
-        <BeneficiaryLookup
-          accountNumber={formData.accountNumber}
-          onBeneficiaryFound={handleBeneficiaryFound}
-          onAccountNumberChange={handleAccountNumberChange}
-        />
+        {/* Account Number with Beneficiary Lookup */}
+        <div>
+          <label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</label>
+          <BeneficiaryLookup
+            accountNumber={formData.accountNumber}
+            onBeneficiaryFound={handleBeneficiaryFound}
+            onAccountNumberChange={handleAccountNumberChange}
+          />
+          {errors.accountNumber && (
+            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {errors.accountNumber}
+            </p>
+          )}
+        </div>
 
         {/* Beneficiary Name (can be edited if lookup fails) */}
         <div>

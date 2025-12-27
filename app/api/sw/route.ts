@@ -57,8 +57,9 @@ self.addEventListener("fetch", (event) => {
 
   return new Response(swCode, {
     headers: {
-      "Content-Type": "application/javascript",
+      "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": "public, max-age=3600",
+      "Service-Worker-Allowed": "/",
     },
   })
 }

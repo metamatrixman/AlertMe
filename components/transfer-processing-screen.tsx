@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Loader2, CreditCard, Shield, CheckCircle } from "lucide-react"
+import { Loader2, CreditCard, Shield, CheckCircle, AlertCircle } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 
 interface TransferProcessingScreenProps {
@@ -12,6 +12,8 @@ interface TransferProcessingScreenProps {
 export function TransferProcessingScreen({ onNavigate, transferData }: TransferProcessingScreenProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const steps = [
     { icon: Shield, label: "Verifying PIN", description: "Authenticating your transaction" },
@@ -20,14 +22,21 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
   ]
 
   useEffect(() => {
+    if (!transferData) {
+      setError("Invalid transfer data")
+      setIsProcessing(false)
+      return
+    }
+
     console.log("[v0] Transfer processing started with data:", transferData)
 
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer)
+          setIsProcessing(false)
 
-          if (transferData) {
+          try {
             dataStore
               .addTransaction({
                 type: `Transfer to ${transferData.bank}`,
@@ -52,6 +61,13 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
                   })
                 }, 500)
               })
+              .catch((err) => {
+                console.error("[v0] Failed to add transaction:", err)
+                setError("Failed to process transaction. Please try again.")
+              })
+          } catch (err) {
+            console.error("[v0] Transaction processing error:", err)
+            setError("An error occurred during processing")
           }
           return 100
         }
@@ -78,6 +94,21 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="text-center max-w-sm mx-auto">
+        {error ? (
+          <>
+            <div className="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Transaction Failed</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={() => onNavigate("dashboard")}
+              className="inline-flex items-center justify-center px-6 py-2 bg-[#004A9F] hover:bg-[#003875] text-white rounded-lg font-medium"
+            >
+              Return to Dashboard
+            </button>
+          </>
+        ) : isProcessing ? (
         {/* Main Loading Animation */}
         <div className="relative mb-8">
           <div className="w-24 h-24 mx-auto mb-4 relative">
@@ -144,6 +175,8 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
         </div>
 
         <div className="mt-6 text-xs text-gray-500">Please do not close this page while processing...</div>
+      </div>
+        ) : null}
       </div>
     </div>
   )

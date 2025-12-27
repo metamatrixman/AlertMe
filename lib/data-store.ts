@@ -93,6 +93,9 @@ class DataStore {
   private readonly BACKUP_KEY = "ecobank_app_backup"
   private readonly VERSION = 1
   private saveTimeout: NodeJS.Timeout | null = null
+  private readonly DEBOUNCE_DELAY = 2000 // 2 second debounce for saves
+  private notifyTimeout: NodeJS.Timeout | null = null
+  private readonly NOTIFY_DEBOUNCE_DELAY = 300 // 300ms debounce for notifications
 
   static getInstance(): DataStore {
     if (!DataStore.instance) {
@@ -255,10 +258,15 @@ class DataStore {
   }
 
   private notify() {
-    this.listeners.forEach((listener) => listener())
+    // Debounce listener notifications to prevent excessive re-renders
+    if (this.notifyTimeout) clearTimeout(this.notifyTimeout)
+    this.notifyTimeout = setTimeout(() => {
+      this.listeners.forEach((listener) => listener())
+    }, this.NOTIFY_DEBOUNCE_DELAY)
 
+    // Debounce storage saves to prevent excessive I/O
     if (this.saveTimeout) clearTimeout(this.saveTimeout)
-    this.saveTimeout = setTimeout(() => this.saveToStorage(), 2000)
+    this.saveTimeout = setTimeout(() => this.saveToStorage(), this.DEBOUNCE_DELAY)
   }
 
   // User data methods
@@ -278,16 +286,29 @@ class DataStore {
 
   updateProfilePicture(pictureUrl: string): void {
     const maxSize = 500000 // 500KB limit for localStorage
+    const indexedDBThreshold = 100000 // 100KB threshold before using IndexedDB
+
     let optimizedUrl = pictureUrl
+    let useIndexedDB = false
 
     if (pictureUrl && pictureUrl.length > maxSize) {
-      console.warn("[v0] Profile picture exceeds size limit, compressing...")
-      // For production, implement image compression here
-      // For now, store with warning
-      optimizedUrl = pictureUrl.substring(0, maxSize)
+      console.warn("[v0] Profile picture exceeds localStorage limit, will use IndexedDB")
+      useIndexedDB = true
+    } else if (pictureUrl && pictureUrl.length > indexedDBThreshold) {
+      // Use IndexedDB for large images even if they fit in localStorage
+      useIndexedDB = true
     }
 
+    // Store in memory first
     this.state.userData.profilePicture = optimizedUrl
+
+    // For large images, store separately in IndexedDB
+    if (useIndexedDB && pictureUrl) {
+      StorageManager.save("ecobank_profile_picture", pictureUrl).catch((err) => {
+        console.error("[v0] Failed to save profile picture to IndexedDB:", err)
+      })
+    }
+
     this.saveToStorage()
     this.notify()
   }
@@ -376,7 +397,8 @@ class DataStore {
   }
 
   findBeneficiaryByAccount(accountNumber: string): Beneficiary | undefined {
-    return this.state.beneficiaries.find((b) => b.accountNumber === accountNumber)
+    const trimmedAccount = accountNumber.trim()
+    return this.state.beneficiaries.find((b) => b.accountNumber.trim() === trimmedAccount)
   }
 
   addBeneficiary(beneficiary: Omit<Beneficiary, "id">): string {

@@ -30,15 +30,44 @@ export interface BusinessCard {
 }
 
 export class SMSService {
+  private static retryAttempts = 3
+  private static retryDelay = 1000 // ms
+  private static lastError: string | null = null
+
+  static getLastError(): string | null {
+    return this.lastError
+  }
+
   // Re-export alert generators for backward compatibility
   static generateDebitAlert = generateDebitAlert
   static generateCreditAlert = generateCreditAlert
   static generateBalanceInquiryAlert = generateBalanceInquiryAlert
   static generateLowBalanceAlert = generateLowBalanceAlert
 
+  private static async retryFetch(
+    url: string,
+    options: RequestInit,
+    attempts = 0
+  ): Promise<Response> {
+    try {
+      const response = await fetch(url, options)
+      if (!response.ok && attempts < this.retryAttempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, this.retryDelay))
+        return this.retryFetch(url, options, attempts + 1)
+      }
+      return response
+    } catch (error) {
+      if (attempts < this.retryAttempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, this.retryDelay))
+        return this.retryFetch(url, options, attempts + 1)
+      }
+      throw error
+    }
+  }
+
   static async sendTransactionAlert(alert: SMSAlert): Promise<boolean> {
     try {
-      const response = await fetch("/api/sms/send", {
+      const response = await this.retryFetch("/api/sms/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(alert),
@@ -47,30 +76,39 @@ export class SMSService {
       const result = await response.json()
 
       if (!result.success) {
-        console.error(`Failed to send SMS: ${result.error}`)
+        this.lastError = `Failed to send SMS: ${result.error || "Unknown error"}`
+        console.error(this.lastError)
         return false
       }
 
       console.log(`SMS sent successfully: ${result.messageId}`)
+      this.lastError = null
       return true
     } catch (error) {
-      console.error("SMS Service Error:", error)
+      this.lastError = `SMS Service Error: ${error instanceof Error ? error.message : String(error)}`
+      console.error(this.lastError)
       return false
     }
   }
 
   static async sendBusinessCard(to: string, card: BusinessCard): Promise<boolean> {
     try {
-      const response = await fetch("/api/sms/business-card", {
+      const response = await this.retryFetch("/api/sms/business-card", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to, ...card }),
       })
 
       const result = await response.json()
-      return result.success
+      if (!result.success) {
+        this.lastError = `Business Card SMS Error: ${result.error || "Unknown error"}`
+        return false
+      }
+      this.lastError = null
+      return true
     } catch (error) {
-      console.error("Business Card SMS Error:", error)
+      this.lastError = `Business Card SMS Error: ${error instanceof Error ? error.message : String(error)}`
+      console.error(this.lastError)
       return false
     }
   }

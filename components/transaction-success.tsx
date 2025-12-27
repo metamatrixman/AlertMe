@@ -1,16 +1,17 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { ArrowLeft, Check, Share } from "lucide-react"
-import { useEffect } from "react"
-import { dataStore } from "@/lib/data-store"
+import { memo } from \"react\"
+import { Button } from \"@/components/ui/button\"
+import { ArrowLeft, Check, Share } from \"lucide-react\"
+import { useEffect } from \"react\"
+import { dataStore } from \"@/lib/data-store\"
 
 interface TransactionSuccessProps {
   onNavigate: (screen: string, data?: any) => void
   transferData?: any
 }
 
-export function TransactionSuccess({ onNavigate, transferData }: TransactionSuccessProps) {
+function TransactionSuccessComponent({ onNavigate, transferData }: TransactionSuccessProps) {
   useEffect(() => {
     if (transferData) {
       console.log("[v0] Transaction success notification added:", transferData)
@@ -95,3 +96,5 @@ export function TransactionSuccess({ onNavigate, transferData }: TransactionSucc
     </div>
   )
 }
+
+export const TransactionSuccess = memo(TransactionSuccessComponent)

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Palette, Check } from "lucide-react"
+import { hexToHsl } from "@/lib/theme-utils"
 
 interface ThemeCustomizerProps {
   onBack: () => void
@@ -28,6 +29,18 @@ interface Theme {
 
 export function ThemeCustomizer({ onBack }: ThemeCustomizerProps) {
   const [selectedTheme, setSelectedTheme] = useState("ecobank")
+
+  // Helper function to convert hex to RGB values
+  const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null
+  }
 
   // Based on the knowledge base theme definitions [^1]
   const themes: Theme[] = [
@@ -228,18 +241,84 @@ export function ThemeCustomizer({ onBack }: ThemeCustomizerProps) {
     },
   ]
 
+  // Helper function to convert hex to RGB values
+  const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null
+  }
+
+  // Helper function to convert hex to HSL
+  const hexToHsl = (hex: string): string => {
+    const rgb = hexToRgb(hex)
+    if (!rgb) return "0 0% 0%"
+
+    let r = rgb.r / 255
+    let g = rgb.g / 255
+    let b = rgb.b / 255
+
+    const max = Math.max(r, g, b)
+    const min = Math.min(r, g, b)
+    let h = 0,
+      s = 0
+    const l = (max + min) / 2
+
+    if (max !== min) {
+      const d = max - min
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+
+      switch (max) {
+        case r:
+          h = ((g - b) / d + (g < b ? 6 : 0)) / 6
+          break
+        case g:
+          h = ((b - r) / d + 2) / 6
+          break
+        case b:
+          h = ((r - g) / d + 4) / 6
+          break
+      }
+    }
+
+    const hue = Math.round(h * 360)
+    const saturation = Math.round(s * 100)
+    const lightness = Math.round(l * 100)
+
+    return `${hue} ${saturation}% ${lightness}%`
+  }
+
   const handleThemeSelect = (themeId: string) => {
     setSelectedTheme(themeId)
     // Apply theme to document root
     const theme = themes.find((t) => t.id === themeId)
     if (theme) {
-      document.documentElement.style.setProperty("--primary", theme.primary)
-      document.documentElement.style.setProperty("--secondary", theme.secondary)
-      document.documentElement.style.setProperty("--accent", theme.accent)
-      document.documentElement.style.setProperty("--background", theme.background)
+      // Convert hex colors to HSL and apply to CSS variables
+      const primaryHsl = hexToHsl(theme.primary)
+      const secondaryHsl = hexToHsl(theme.secondary)
+      const accentHsl = hexToHsl(theme.accent)
+      const backgroundHsl = hexToHsl(theme.background)
+
+      document.documentElement.style.setProperty("--primary", primaryHsl)
+      document.documentElement.style.setProperty("--secondary", secondaryHsl)
+      document.documentElement.style.setProperty("--accent", accentHsl)
+      document.documentElement.style.setProperty("--background", backgroundHsl)
+
+      // Also set the Tailwind color values directly for components that use hardcoded colors
+      document.documentElement.style.setProperty("--primary-color", theme.primary)
+      document.documentElement.style.setProperty("--secondary-color", theme.secondary)
+      document.documentElement.style.setProperty("--accent-color", theme.accent)
+      document.documentElement.style.setProperty("--background-color", theme.background)
 
       // Save theme preference
-      localStorage.setItem("ecobank-theme", themeId)
+      localStorage.setItem("ecobank-theme", JSON.stringify({ themeId, ...theme }))
+      
+      // Trigger a change event to notify other components
+      window.dispatchEvent(new CustomEvent("themeChanged", { detail: { themeId, theme } }))
     }
   }
 

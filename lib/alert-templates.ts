@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * SMS Alert Templates for Banking Transactions
  */

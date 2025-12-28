@@ -1,21 +1,34 @@
-"use client"
-
 /**
- * Client-side SMS service mock
+ * SMS Alert Service
+ * Calls the server-side SMS API endpoint
  */
 
-interface SMSAlert {
+export interface SMSAlert {
   to: string
   message: string
   type: "debit" | "credit" | "balance" | "notification"
 }
 
 export async function sendTransactionAlert(alert: SMSAlert): Promise<void> {
-  // Mock SMS sending - in production this would call a server endpoint
-  console.log(`📱 SMS Alert [${alert.type.toUpperCase()}]:`)
-  console.log(`To: ${alert.to}`)
-  console.log(`Message: ${alert.message}`)
+  try {
+    // Call server-side SMS endpoint
+    const response = await fetch("/api/sms/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(alert),
+    })
 
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
+    const result = await response.json()
+    
+    if (result.success) {
+      console.log(`✅ SMS Alert [${alert.type.toUpperCase()}] sent successfully:`)
+      console.log(`   To: ${alert.to}`)
+      console.log(`   Message ID: ${result.messageId}`)
+    } else {
+      console.error(`❌ SMS Alert [${alert.type.toUpperCase()}] failed:`)
+      console.error(`   Error: ${result.error}`)
+    }
+  } catch (error) {
+    console.error(`❌ SMS Service Error:`, error)
+  }
 }

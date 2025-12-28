@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useStorageInit } from "@/hooks/use-storage-init"
+import { useThemeInit } from "@/hooks/use-theme-init"
 import { SplashScreen } from "@/components/splash-screen"
 import { LoginScreen } from "@/components/login-screen"
 import { EnhancedDashboard } from "@/components/enhanced-dashboard"
@@ -35,6 +36,7 @@ import { LoanRequirementsChecklist } from "@/components/loan-requirements-checkl
 
 export default function Home() {
   useStorageInit()
+  useThemeInit()
 
   const [currentScreen, setCurrentScreen] = useState("splash")
   const [isMenuOpen, setIsMenuOpen] = useState(false)

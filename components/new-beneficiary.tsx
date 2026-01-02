@@ -41,7 +41,16 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
   // Load saved beneficiaries
   useEffect(() => {
     const beneficiaries = dataStore.getBeneficiaries()
-    setSavedBeneficiaries(beneficiaries)
+
+    // Add 20 sample beneficiaries for testing
+    const sampleBeneficiaries = Array.from({ length: 20 }, (_, i) => ({
+      id: `sample-${i}`, // Ensure unique IDs for React key
+      accountNumber: `123456789${i}`,
+      bank: `Sample Bank ${i + 1}`,
+      name: `Sample Beneficiary ${i + 1}`,
+    }))
+
+    setSavedBeneficiaries([...beneficiaries, ...sampleBeneficiaries])
   }, [])
 
   const methods = useValidatedForm(beneficiarySchema, {
@@ -49,7 +58,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
       accountNumber: "",
       bank: "",
       beneficiaryName: "",
-      amount: "",
+      amount: 0, // FIXED: Default amount is now number 0
       remark: "",
       saveAsBeneficiary: true,
     },
@@ -79,11 +88,11 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
       const payload = {
         accountNumber: values.accountNumber.trim(),
         bank: values.bank,
-        beneficiaryName: values.beneficiaryName.trim(),
+        name: values.beneficiaryName.trim(), // FIXED: Added 'name' for dataStore
       }
 
       if (values.saveAsBeneficiary) {
-        dataStore.addBeneficiary(payload)
+        dataStore.addBeneficiary(payload) // FIXED: Payload now includes 'name'
       }
 
       toast({ title: "Transfer ready", description: "You can now complete the transfer." })
@@ -94,7 +103,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
       onNavigate("transfer", {
         accountNumber: payload.accountNumber,
         bank: payload.bank,
-        beneficiaryName: payload.beneficiaryName,
+        beneficiaryName: payload.name, // FIXED: Using 'name' for navigation
         amount,
         remark: values.remark,
       })
@@ -126,9 +135,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
               key={tab}
               variant={activeTab === tab ? "default" : "ghost"}
               size="sm"
-              className={`rounded-full px-6 ${
-                activeTab === tab ? "bg-[#A4D233] hover:bg-[#8BC220] text-black" : "text-gray-600"
-              }`}
+              className={"rounded-full px-6 " + (activeTab === tab ? "bg-[#A4D233] hover:bg-[#8BC220] text-black" : "text-gray-600")}
               onClick={() => setActiveTab(tab)}
             >
               {tab}
@@ -140,132 +147,132 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
       {/* Content based on active tab */}
       {activeTab === "New Beneficiary" ? (
         <Form methods={methods} onSubmit={onContinue}>
-          <div className="px-4 py-6 space-y-6">
-            {/* Form-level Error Display */}
-            {formError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
-                <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-red-700">{formError}</div>
-              </div>
-            )}
-
-            {/* From Account */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">From account</label>
-            <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
-                <div>
-                  <div className="text-sm font-medium">Savings account</div>
-                  <div className="text-xs text-gray-600">ADEFEMI JOHN OLAYEMI</div>
+            <div className="px-4 py-6 space-y-6">
+              {/* Form-level Error Display */}
+              {formError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-red-700">{formError}</div>
                 </div>
+              )}
+
+              {/* From Account */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">From account</label>
+              <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
+                  <div>
+                    <div className="text-sm font-medium">Savings account</div>
+                    <div className="text-xs text-gray-600">ADEFEMI JOHN OLAYEMI</div>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 text-gray-400" />
               </div>
-              <ChevronDown className="h-5 w-5 text-gray-400" />
+              </div>
+
+              {/* Bank */}
+              <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Bank</label>
+              <Select value={watch("bank")} onValueChange={(value) => { setValue("bank", value); (formState.errors as any).bank && clearErrors("bank") }}>
+                <SelectTrigger className={"bg-white " + ((formState.errors as any).bank ? "border-red-500" : "")}>
+                  <SelectValue placeholder="Select bank" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50">Traditional Banks</div>
+                  {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
+                    <SelectItem key={bank.code} value={bank.name}>
+                      {bank.name}
+                    </SelectItem>
+                  ))}
+                  <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50 mt-2">
+                    Digital Wallets & Fintech
+                  </div>
+                  {NIGERIAN_BANKS.filter((bank) => bank.type === "wallet").map((bank) => (
+                    <SelectItem key={bank.code} value={bank.name}>
+                      {bank.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormError name="bank" />
             </div>
-          </div>
 
-          {/* Bank */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Bank</label>
-            <Select value={watch("bank")} onValueChange={(value) => { setValue("bank", value); (formState.errors as any).bank && clearErrors("bank") }}>
-              <SelectTrigger className={`bg-white ${(formState.errors as any).bank ? "border-red-500" : ""}`}>
-                <SelectValue placeholder="Select bank" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50">Traditional Banks</div>
-                {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
-                  <SelectItem key={bank.code} value={bank.name}>
-                    {bank.name}
-                  </SelectItem>
-                ))}
-                <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50 mt-2">
-                  Digital Wallets & Fintech
-                </div>
-                {NIGERIAN_BANKS.filter((bank) => bank.type === "wallet").map((bank) => (
-                  <SelectItem key={bank.code} value={bank.name}>
-                    {bank.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormError name="bank" />
-          </div>
+            {/* Account Number with Beneficiary Lookup */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</label>
+              <BeneficiaryLookup
+                accountNumber={accountNumber}
+                onBeneficiaryFound={handleBeneficiaryFound}
+                onAccountNumberChange={onAccountNumberChange}
+              />
+              <FormError name="accountNumber" />
+            </div>
 
-          {/* Account Number with Beneficiary Lookup */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</label>
-            <BeneficiaryLookup
-              accountNumber={accountNumber}
-              onBeneficiaryFound={handleBeneficiaryFound}
-              onAccountNumberChange={onAccountNumberChange}
-            />
-            <FormError name="accountNumber" />
-          </div>
+            {/* Beneficiary Name (can be edited if lookup fails) */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Beneficiary Name</label>
+              <Input
+                placeholder="Enter or confirm beneficiary name"
+                {...methods.register("beneficiaryName")}
+                className="bg-white"
+              />
+              <FormError name="beneficiaryName" />
+            </div>
 
-          {/* Beneficiary Name (can be edited if lookup fails) */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Beneficiary Name</label>
-            <Input
-              placeholder="Enter or confirm beneficiary name"
-              {...methods.register("beneficiaryName")}
-              className="bg-white"
-            />
-            <FormError name="beneficiaryName" />
-          </div>
+            {/* Amount */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Amount</label>
+              <Input
+                placeholder="Enter amount (e.g. 1000.00)"
+                inputMode="numeric"
+                step="0.01"
+                pattern="^\d+(\.\d{1,2})?$"
+                {...methods.register("amount")}
+                className="bg-white"
+                onBlur={(e) => {
+                  const v = e.currentTarget.value
+                  if (!v) return
+                  const n = Number(v)
+                  methods.setValue("amount", Number(n.toFixed(2)))
+                }}
+              />
+              <FormError name="amount" />
+            </div>
 
-          {/* Amount */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Amount</label>
-            <Input
-              placeholder="Enter amount (e.g. 1000.00)"
-              inputMode="numeric"
-              step="0.01"
-              pattern="^\d+(\.\d{1,2})?$"
-              {...methods.register("amount")}
-              className="bg-white"
-              onBlur={(e) => {
-                const v = e.currentTarget.value
-                if (!v) return
-                const n = Number(v)
-                methods.setValue("amount", Number(n.toFixed(2)))
-              }}
-            />
-            <FormError name="amount" />
-          </div>
+            {/* Remark */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Remark (optional)</label>
+              <Input
+                placeholder="Enter remark"
+                {...methods.register("remark")}
+                className="bg-white"
+              />
+            </div>
 
-          {/* Remark */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Remark (optional)</label>
-            <Input
-              placeholder="Enter remark"
-              {...methods.register("remark")}
-              className="bg-white"
-            />
-          </div>
+            {/* Save as Beneficiary */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="save-beneficiary"
+                checked={watch("saveAsBeneficiary")}
+                onCheckedChange={(checked) => setValue("saveAsBeneficiary", !!checked)}
+              />
+              <label htmlFor="save-beneficiary" className="text-sm font-medium text-gray-700">
+                Save as beneficiary
+              </label>
+            </div>
 
-          {/* Save as Beneficiary */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="save-beneficiary"
-              checked={watch("saveAsBeneficiary")}
-              onCheckedChange={(checked) => setValue("saveAsBeneficiary", !!checked)}
-            />
-            <label htmlFor="save-beneficiary" className="text-sm font-medium text-gray-700">
-              Save as beneficiary
-            </label>
-          </div>
-          </div>
-
-          {/* Continue Button */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3 rounded-full disabled:opacity-50"
-            >
-              {isSubmitting ? "Processing..." : "Continue"}
-            </Button>
-          </div>
+            {/* Continue Button */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3 rounded-full disabled:opacity-50"
+              >
+                {isSubmitting ? "Processing..." : "Continue"}
+              </Button>
+            </div>
+            </div>
         </Form>
       ) : (
         // Saved Beneficiaries Tab
@@ -308,3 +315,6 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
           )}
         </div>
       )}
+    </div>
+  )
+}

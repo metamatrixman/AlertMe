@@ -62,6 +62,18 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
       location: "Ibadan, Nigeria",
       avatar: "M",
     },
+    // Add 20 sample beneficiaries
+    ...Array.from({ length: 20 }, (_, i) => ({
+      id: `sample-${i + 4}`,
+      name: `Sample Beneficiary ${i + 1}`,
+      bank: `Sample Bank ${i + 1}`,
+      accountNumber: `123456789${i}`,
+      phone: `+234 800 000 00${i}`,
+      balance: Math.floor(Math.random() * 100000),
+      type: i % 2 === 0 ? "P2P" : "Business",
+      location: `City ${i + 1}, Nigeria`,
+      avatar: `SB${i + 1}`,
+    })),
   ])
 
   const [searchTerm, setSearchTerm] = useState("")

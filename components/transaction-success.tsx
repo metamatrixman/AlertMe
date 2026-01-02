@@ -4,6 +4,7 @@ import { memo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Check, Share } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface TransactionSuccessProps {
   onNavigate: (screen: string, data?: any) => void
@@ -16,7 +17,7 @@ function TransactionSuccessComponent({ onNavigate, transferData }: TransactionSu
       console.log("[v0] Transaction success notification added:", transferData)
       dataStore.addNotification({
         title: "Money Sent Successfully",
-        message: `₦${Number.parseFloat(transferData.amount || "0").toLocaleString()} sent to ${transferData.beneficiaryName || "Recipient"} in ${transferData.bank}`,
+        message: `₦${formatCurrency(Number.parseFloat(transferData.amount || "0"))} sent to ${transferData.beneficiaryName || "Recipient"} in ${transferData.bank}`,
         type: "success",
       })
     }
@@ -44,7 +45,7 @@ function TransactionSuccessComponent({ onNavigate, transferData }: TransactionSu
         <h2 className="text-2xl font-bold mb-4">Transfer Successful</h2>
 
         <div className="text-4xl font-bold mb-2">
-          ₦ {transferData?.amount ? Number.parseFloat(transferData.amount).toLocaleString() : "0.00"}
+          ₦ {transferData?.amount ? formatCurrency(Number.parseFloat(transferData.amount)) : "0.00"}
         </div>
 
         <div className="text-sm text-gray-600 mb-6">

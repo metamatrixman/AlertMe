@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, CreditCard, Calculator, Home } from "lucide-react"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface LoansScreenProps {
   onBack: () => void
@@ -102,11 +103,11 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-gray-600">Original Amount</div>
-                      <div className="font-medium">₦{loan.amount.toLocaleString()}</div>
+                      <div className="font-medium">₦{formatCurrency(loan.amount)}</div>
                     </div>
                     <div>
                       <div className="text-gray-600">Balance</div>
-                      <div className="font-medium text-red-600">₦{loan.balance.toLocaleString()}</div>
+                      <div className="font-medium text-red-600">₦{formatCurrency(loan.balance)}</div>
                     </div>
                     <div>
                       <div className="text-gray-600">Due Date</div>
@@ -141,10 +142,16 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
               <Label htmlFor="loan-amount">Loan Amount (₦)</Label>
               <Input
                 id="loan-amount"
-                type="number"
+                inputMode="numeric"
+                step="0.01"
+                placeholder="Enter loan amount (e.g. 1000.00)"
                 value={loanAmount}
-                onChange={(e) => setLoanAmount(e.target.value)}
-                placeholder="Enter loan amount"
+                onChange={(e) => setLoanAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+                onBlur={() => {
+                  if (!loanAmount) return
+                  const n = Number(loanAmount)
+                  setLoanAmount(Number(n.toFixed(2)).toFixed(2))
+                }}
               />
             </div>
 
@@ -196,7 +203,7 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="text-gray-600">Max Amount</div>
-                    <div className="font-medium">₦{loan.maxAmount.toLocaleString()}</div>
+                    <div className="font-medium">₦{formatCurrency(loan.maxAmount)}</div>
                   </div>
                   <div>
                     <div className="text-gray-600">Term</div>

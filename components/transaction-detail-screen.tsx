@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Share2, Download, Copy, Check } from "lucide-react"
 import { useState } from "react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface TransactionDetailScreenProps {
   transactionId: string
@@ -81,7 +82,7 @@ export function TransactionDetailScreen({ transactionId, onBack }: TransactionDe
             </div>
             <h2 className="text-xl font-bold mb-2">{transaction.type}</h2>
             <div className="text-3xl font-bold mb-2">
-              {transaction.isDebit ? "-" : "+"} ₦{transaction.amount.toLocaleString()}
+              {transaction.isDebit ? "-" : "+"} ₦{formatCurrency(transaction.amount)}
             </div>
             <Badge className={getStatusColor(transaction.status)}>{transaction.status}</Badge>
           </CardContent>

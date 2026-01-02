@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, Crown, Star, Zap, Shield, Globe, CheckCircle, Home } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface UpgradeLimitScreenProps {
   onBack: () => void
@@ -189,11 +190,11 @@ export function UpgradeLimitScreen({ onBack, onNavigate }: UpgradeLimitScreenPro
                   <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
                     <div className="text-center">
                       <div className="text-xs text-gray-600">Daily Limit</div>
-                      <div className="font-semibold">₦{tier.dailyLimit.toLocaleString()}</div>
+                      <div className="font-semibold">₦{formatCurrency(tier.dailyLimit)}</div>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center">Fn
                       <div className="text-xs text-gray-600">Monthly Limit</div>
-                      <div className="font-semibold">₦{tier.monthlyLimit.toLocaleString()}</div>
+                      <div className="font-semibold">₦{formatCurrency(tier.monthlyLimit)}</div>
                     </div>
                   </div>
 

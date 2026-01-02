@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -9,105 +10,100 @@ import { ArrowLeft, ChevronDown, Home, AlertCircle } from "lucide-react"
 import { NIGERIAN_BANKS } from "@/lib/banks-data"
 import { BeneficiaryLookup } from "@/components/beneficiary-lookup"
 import { dataStore } from "@/lib/data-store"
+import { useValidatedForm } from "@/hooks/use-validated-form"
+import Form, { FormError } from "@/components/ui/form"
+import { accountNumberSchema, nameSchema, amountSchema, getErrorMessage } from "@/lib/form-utils"
+import { useToast } from "@/hooks/use-toast"
 
 interface NewBeneficiaryProps {
   onBack: () => void
   onNavigate: (screen: string, data?: any) => void
 }
 
-interface FormErrors {
-  accountNumber?: string
-  bank?: string
-  amount?: string
-  beneficiaryName?: string
-}
+const beneficiarySchema = z.object({
+  bank: z.string().min(1, "Please select a bank"),
+  accountNumber: z
+    .string()
+    .min(10, "Account number must be at least 10 digits")
+    .regex(/^\d+$/, "Account number must contain only digits"),
+  beneficiaryName: nameSchema,
+  amount: amountSchema,
+  remark: z.string().optional(),
+  saveAsBeneficiary: z.boolean().default(true),
+})
 
 export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
   const [activeTab, setActiveTab] = useState("New Beneficiary")
-  const [formData, setFormData] = useState({
-    accountNumber: "",
-    bank: "",
-    beneficiaryName: "",
-    amount: "",
-    remark: "",
-    saveAsBeneficiary: true,
+  const [formError, setFormError] = useState("")
+  const [savedBeneficiaries, setSavedBeneficiaries] = useState<any[]>([])
+  const { toast } = useToast()
+
+  // Load saved beneficiaries
+  useEffect(() => {
+    const beneficiaries = dataStore.getBeneficiaries()
+    setSavedBeneficiaries(beneficiaries)
+  }, [])
+
+  const methods = useValidatedForm(beneficiarySchema, {
+    defaultValues: {
+      accountNumber: "",
+      bank: "",
+      beneficiaryName: "",
+      amount: "",
+      remark: "",
+      saveAsBeneficiary: true,
+    },
   })
-  const [errors, setErrors] = useState<FormErrors>({})
-  const [isValidating, setIsValidating] = useState(false)
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {}
+  const { watch, setValue, handleSubmit, formState, clearErrors } = methods
+  const { isSubmitting } = formState
 
-    if (!formData.accountNumber?.trim()) {
-      newErrors.accountNumber = "Account number is required"
-    } else if (formData.accountNumber.length < 10) {
-      newErrors.accountNumber = "Account number must be at least 10 digits"
-    } else if (!/^\d+$/.test(formData.accountNumber)) {
-      newErrors.accountNumber = "Account number must contain only digits"
-    }
-
-    if (!formData.bank?.trim()) {
-      newErrors.bank = "Please select a bank"
-    }
-
-    if (!formData.beneficiaryName?.trim()) {
-      newErrors.beneficiaryName = "Beneficiary name is required"
-    }
-
-    if (!formData.amount?.trim()) {
-      newErrors.amount = "Amount is required"
-    } else if (isNaN(Number(formData.amount)) || Number(formData.amount) <= 0) {
-      newErrors.amount = "Amount must be a valid positive number"
-    } else if (Number(formData.amount) > 10000000) {
-      newErrors.amount = "Amount exceeds maximum limit of ₦10,000,000"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  const accountNumber = watch("accountNumber")
 
   const handleBeneficiaryFound = (info: { name: string; bank?: string; accountNumber?: string }) => {
-    setFormData({
-      ...formData,
-      beneficiaryName: info.name,
-      // only set bank/account if not already selected by user
-      bank: formData.bank || info.bank || "",
-      accountNumber: formData.accountNumber || info.accountNumber || formData.accountNumber,
-    })
-    setErrors({ ...errors, beneficiaryName: undefined })
+    if (info.name) setValue("beneficiaryName", info.name)
+    if (info.bank) setValue("bank", info.bank)
+    if (info.accountNumber) setValue("accountNumber", info.accountNumber)
+    clearErrors(["beneficiaryName", "bank", "accountNumber"] as any)
   }
 
-  const handleAccountNumberChange = (value: string) => {
-    setFormData({ ...formData, accountNumber: value })
-    if (errors.accountNumber) {
-      setErrors({ ...errors, accountNumber: undefined })
-    }
+  const onAccountNumberChange = (value: string) => {
+    // keep digits only
+    setValue("accountNumber", value.replace(/\D/g, ""))
+    if ((formState.errors as any).accountNumber) clearErrors("accountNumber")
   }
 
-  const handleContinue = () => {
-    setIsValidating(true)
-    if (!validateForm()) {
-      setIsValidating(false)
-      return
-    }
+  const onContinue = handleSubmit(async (values) => {
+    setFormError("")
+    try {
+      const payload = {
+        accountNumber: values.accountNumber.trim(),
+        bank: values.bank,
+        beneficiaryName: values.beneficiaryName.trim(),
+      }
 
-    if (formData.saveAsBeneficiary) {
-      dataStore.addBeneficiary({
-        name: formData.beneficiaryName,
-        accountNumber: formData.accountNumber,
-        bank: formData.bank,
+      if (values.saveAsBeneficiary) {
+        dataStore.addBeneficiary(payload)
+      }
+
+      toast({ title: "Transfer ready", description: "You can now complete the transfer." })
+
+      // amountSchema transforms to number, but ensure we pass number
+      const amount = typeof values.amount === "number" ? values.amount : Number(values.amount)
+
+      onNavigate("transfer", {
+        accountNumber: payload.accountNumber,
+        bank: payload.bank,
+        beneficiaryName: payload.beneficiaryName,
+        amount,
+        remark: values.remark,
       })
+    } catch (err) {
+      const msg = getErrorMessage(err)
+      setFormError(msg)
+      toast({ title: "Failed", description: msg, variant: "destructive" })
     }
-
-    setIsValidating(false)
-    onNavigate("transfer", {
-      accountNumber: formData.accountNumber,
-      bank: formData.bank,
-      beneficiaryName: formData.beneficiaryName,
-      amount: formData.amount,
-      remark: formData.remark,
-    })
-  }
+  })
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -141,140 +137,174 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
         </div>
       </div>
 
-      {/* Form */}
-      <div className="px-4 py-6 space-y-6">
-        {/* Error Display */}
-        {Object.keys(errors).length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
-            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-red-700">
-              {Object.values(errors)[0]}
+      {/* Content based on active tab */}
+      {activeTab === "New Beneficiary" ? (
+        <Form methods={methods} onSubmit={onContinue}>
+          <div className="px-4 py-6 space-y-6">
+            {/* Form-level Error Display */}
+            {formError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
+                <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-red-700">{formError}</div>
+              </div>
+            )}
+
+            {/* From Account */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">From account</label>
+            <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
+                <div>
+                  <div className="text-sm font-medium">Savings account</div>
+                  <div className="text-xs text-gray-600">ADEFEMI JOHN OLAYEMI</div>
+                </div>
+              </div>
+              <ChevronDown className="h-5 w-5 text-gray-400" />
             </div>
           </div>
-        )}
 
-        {/* From Account */}}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">From account</label>
-          <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
-              <div>
-                <div className="text-sm font-medium">Savings account</div>
-                <div className="text-xs text-gray-600">ADEFEMI JOHN OLAYEMI</div>
-              </div>
-            </div>
-            <ChevronDown className="h-5 w-5 text-gray-400" />
+          {/* Bank */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Bank</label>
+            <Select value={watch("bank")} onValueChange={(value) => { setValue("bank", value); (formState.errors as any).bank && clearErrors("bank") }}>
+              <SelectTrigger className={`bg-white ${(formState.errors as any).bank ? "border-red-500" : ""}`}>
+                <SelectValue placeholder="Select bank" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50">Traditional Banks</div>
+                {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
+                  <SelectItem key={bank.code} value={bank.name}>
+                    {bank.name}
+                  </SelectItem>
+                ))}
+                <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50 mt-2">
+                  Digital Wallets & Fintech
+                </div>
+                {NIGERIAN_BANKS.filter((bank) => bank.type === "wallet").map((bank) => (
+                  <SelectItem key={bank.code} value={bank.name}>
+                    {bank.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormError name="bank" />
           </div>
-        </div>
 
-        {/* Bank */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Bank</label>
-          <Select value={formData.bank} onValueChange={(value) => {
-            setFormData({ ...formData, bank: value })
-            if (errors.bank) setErrors({ ...errors, bank: undefined })
-          }}>
-            <SelectTrigger className={`bg-white ${errors.bank ? "border-red-500" : ""}`}>
-              <SelectValue placeholder="Select bank" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60">
-              <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50">Traditional Banks</div>
-              {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
-                <SelectItem key={bank.code} value={bank.name}>
-                  {bank.name}
-                </SelectItem>
-              ))}
-              <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50 mt-2">
-                Digital Wallets & Fintech
+          {/* Account Number with Beneficiary Lookup */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</label>
+            <BeneficiaryLookup
+              accountNumber={accountNumber}
+              onBeneficiaryFound={handleBeneficiaryFound}
+              onAccountNumberChange={onAccountNumberChange}
+            />
+            <FormError name="accountNumber" />
+          </div>
+
+          {/* Beneficiary Name (can be edited if lookup fails) */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Beneficiary Name</label>
+            <Input
+              placeholder="Enter or confirm beneficiary name"
+              {...methods.register("beneficiaryName")}
+              className="bg-white"
+            />
+            <FormError name="beneficiaryName" />
+          </div>
+
+          {/* Amount */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Amount</label>
+            <Input
+              placeholder="Enter amount (e.g. 1000.00)"
+              inputMode="numeric"
+              step="0.01"
+              pattern="^\d+(\.\d{1,2})?$"
+              {...methods.register("amount")}
+              className="bg-white"
+              onBlur={(e) => {
+                const v = e.currentTarget.value
+                if (!v) return
+                const n = Number(v)
+                methods.setValue("amount", Number(n.toFixed(2)))
+              }}
+            />
+            <FormError name="amount" />
+          </div>
+
+          {/* Remark */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Remark (optional)</label>
+            <Input
+              placeholder="Enter remark"
+              {...methods.register("remark")}
+              className="bg-white"
+            />
+          </div>
+
+          {/* Save as Beneficiary */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="save-beneficiary"
+              checked={watch("saveAsBeneficiary")}
+              onCheckedChange={(checked) => setValue("saveAsBeneficiary", !!checked)}
+            />
+            <label htmlFor="save-beneficiary" className="text-sm font-medium text-gray-700">
+              Save as beneficiary
+            </label>
+          </div>
+          </div>
+
+          {/* Continue Button */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3 rounded-full disabled:opacity-50"
+            >
+              {isSubmitting ? "Processing..." : "Continue"}
+            </Button>
+          </div>
+        </Form>
+      ) : (
+        // Saved Beneficiaries Tab
+        <div className="px-4 py-6 pb-24">
+          {savedBeneficiaries.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-2">
+                <AlertCircle className="h-12 w-12 mx-auto opacity-50" />
               </div>
-              {NIGERIAN_BANKS.filter((bank) => bank.type === "wallet").map((bank) => (
-                <SelectItem key={bank.code} value={bank.name}>
-                  {bank.name}
-                </SelectItem>
+              <p className="text-gray-600 text-sm">No saved beneficiaries yet</p>
+              <p className="text-gray-500 text-xs mt-1">Add a beneficiary to see them here</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {savedBeneficiaries.map((beneficiary) => (
+                <Button
+                  key={beneficiary.id}
+                  variant="ghost"
+                  className="w-full h-auto p-4 justify-start bg-white hover:bg-gray-50 border border-gray-200 rounded-lg"
+                  onClick={() => {
+                    const amount = methods.getValues("amount") || ""
+                    const remark = methods.getValues("remark") || ""
+                    
+                    onNavigate("transfer", {
+                      accountNumber: beneficiary.accountNumber,
+                      bank: beneficiary.bank,
+                      beneficiaryName: beneficiary.name,
+                      amount: amount ? Number(amount) : 0,
+                      remark: remark,
+                    })
+                  }}
+                >
+                  <div className="w-full text-left">
+                    <div className="font-medium text-sm text-gray-900">{beneficiary.name}</div>
+                    <div className="text-xs text-gray-600 mt-1">{beneficiary.bank}</div>
+                  </div>
+                </Button>
               ))}
-            </SelectContent>
-          </Select>
-          {errors.bank && (
-            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {errors.bank}
-            </p>
+            </div>
           )}
         </div>
-
-        {/* Account Number with Beneficiary Lookup */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Account Number</label>
-          <BeneficiaryLookup
-            accountNumber={formData.accountNumber}
-            onBeneficiaryFound={handleBeneficiaryFound}
-            onAccountNumberChange={handleAccountNumberChange}
-          />
-          {errors.accountNumber && (
-            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {errors.accountNumber}
-            </p>
-          )}
-        </div>
-
-        {/* Beneficiary Name (can be edited if lookup fails) */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Beneficiary Name</label>
-          <Input
-            placeholder="Enter or confirm beneficiary name"
-            value={formData.beneficiaryName}
-            onChange={(e) => setFormData({ ...formData, beneficiaryName: e.target.value })}
-            className="bg-white"
-          />
-        </div>
-
-        {/* Amount */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Amount</label>
-          <Input
-            placeholder="Enter amount"
-            value={formData.amount}
-            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-            className="bg-white"
-            type="number"
-          />
-        </div>
-
-        {/* Remark */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Remark (optional)</label>
-          <Input
-            placeholder="Enter remark"
-            value={formData.remark}
-            onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
-            className="bg-white"
-          />
-        </div>
-
-        {/* Save as Beneficiary */}
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="save-beneficiary"
-            checked={formData.saveAsBeneficiary}
-            onCheckedChange={(checked) => setFormData({ ...formData, saveAsBeneficiary: checked as boolean })}
-          />
-          <label htmlFor="save-beneficiary" className="text-sm font-medium text-gray-700">
-            Save as beneficiary
-          </label>
-        </div>
-      </div>
-
-      {/* Continue Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
-        <Button
-          onClick={handleContinue}
-          className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3 rounded-full"
-        >
-          Continue
-        </Button>
-      </div>
-    </div>
-  )
-}
+      )}

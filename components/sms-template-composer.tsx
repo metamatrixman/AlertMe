@@ -29,6 +29,7 @@ import {
 } from "lucide-react"
 import { NIGERIAN_BANKS } from "@/lib/banks-data"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 import { StorageManager } from "@/lib/storage-manager"
 
 interface SMSTemplate {
@@ -257,7 +258,7 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       account_number: beneficiary?.accountNumber || "0123456789",
-      balance: userData.balance.toLocaleString(),
+      balance: formatCurrency(userData.balance),
       reference: `TXN${Date.now().toString().slice(-9)}`,
       description: "Transfer",
       bank_name: template.bank,

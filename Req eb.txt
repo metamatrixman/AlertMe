@@ -1,0 +1,90 @@
+System Requirements Specification (SRS)
+
+Project Name: "Ecobank Express" - Mobile Banking Application
+Version: 1.1
+Purpose: This document defines the complete system requirements for the "NaijaPay" mobile application. The primary goal is to create a secure, real-time, and intuitive mobile banking platform for the Nigerian market. This document serves as the single source of truth for AI-assisted development, ensuring all generated features and components adhere to the specified standards.
+
+Section 1: Overarching System Directives
+
+These are the highest-priority, non-negotiable rules that govern the entire project.
+
+D-01 (UI/UX Replication): The user interface and user experience (UI/UX) of this application shall be a direct and faithful replica of the latest public version of the Nigerian Ecobank mobile banking application. All layouts, component styles, navigation flows, and visual elements must match the reference app unless otherwise specified in this document.
+
+D-02 (Nigerian Banking Standards): The system shall strictly adhere to the following Nigerian financial standards:
+
+Account Numbers: All generated and validated bank account numbers must be 10 digits long.
+
+Currency: All financial values must be handled and displayed in Nigerian Naira (₦), formatted with the appropriate currency symbol (e.g., ₦1,000.00).
+
+Transaction Fees: A transaction fee of 1% of the transfer amount shall be applied, with a minimum fee of ₦10. This fee must be clearly displayed to the user before confirming a transaction.
+
+Section 2: Functional Requirements (What the System Shall Do)
+
+FR-BANK: Core Banking Operations
+
+FR-BANK-01 (Money Transfer): The system shall allow an authenticated user to initiate a funds transfer to any valid 10-digit Nigerian bank account or digital wallet account listed in FR-DATA-01.
+
+FR-BANK-02 (Airtime Purchase): The system shall allow a user to purchase mobile airtime for all major Nigerian networks, specifically: MTN, Airtel, Glo, and 9mobile.
+
+FR-BANK-03 (Transaction History): The system shall display a complete and detailed transaction history for the user, including transaction type, amount, date, timestamp, recipient/sender details, and a unique reference number for each entry.
+
+FR-BANK-04 (Balance Management): The system shall display the user's real-time account balance. It shall also provide a toggle control (e.g., an 'eye' icon) to show or hide the balance amount for privacy.
+
+FR-SEC: Security and Verification
+
+FR-SEC-01 (Transaction PIN): The system shall require the user to enter a correct 4-digit Transaction PIN to authorize all monetary transactions (transfers, airtime purchases, bill payments).
+
+
+FR-SEC-02 (Input Validation): The system shall validate and sanitize all user-provided input on both the client-side and server-side to prevent security vulnerabilities like XSS and SQL injection.
+
+FR-SEC-03 (Account Number Masking): Within transaction histories and beneficiary lists, the system shall mask account numbers for privacy, displaying only the first three and last four digits (e.g., 123***1234).
+
+FR-SEC-04 (Beneficiary Lookup): When a user enters a valid 10-digit account number in the transfer form, the system shall perform a real-time lookup to fetch and display the beneficiary's full name for verification before the user proceeds.
+
+FR-NOTIF: Notification System
+
+FR-NOTIF-01 (Real-time Alerts): The system shall generate automatic in-app notifications and push notifications for all transaction events (e.g., successful debit, successful credit, failed transaction).
+
+FR-NOTIF-02 (SMS Alerts): The system shall send an SMS notification to both the sender and the recipient upon the successful completion of a money transfer.
+
+FR-NOTIF-03 (Notification History): The system shall maintain a dedicated "Notifications" screen where users can view a history of all past in-app alerts.
+
+FR-NOTIF-04 (Confirmation Details): All transaction confirmation notifications (in-app and SMS) shall include a unique transaction reference number.
+
+FR-PAGES: UI Pages and Screens
+
+FR-PAGES-01 (Transfer Page): The system shall provide a "Transfer" page that includes fields for beneficiary bank/wallet, account number, amount, and an optional remarks field.
+
+FR-PAGES-02 (Beneficiary Management): The system shall allow users to save frequent recipients as "beneficiaries" to expedite future transfers.
+
+FR-PAGES-03 (Bills Payment): The system shall provide a "Bills Payment" section, categorized for services like electricity, cable TV, and internet data plans.
+
+FR-PAGES-04 (Misc. Placeholders): The UI shall include placeholder pages/sections for "Airline Booking," "QR Payment," and "Loans" to demonstrate a complete feature set. Functionality for these pages is out of scope for the initial version.
+
+FR-DATA: Database and Integration
+
+FR-DATA-01 (Financial Institutions): The system's database shall be populated with a comprehensive list of 30+ Nigerian banks and major digital wallets, including OPay, PalmPay, Moniepoint, and Kuda. This list will populate the "Select Bank" dropdown.
+
+FR-DATA-02 (Database Schema): The database shall be designed with a normalized SQL schema, establishing proper relationships (e.g., one-to-many between users and transactions).
+
+FR-DATA-03 (Form Integration): All user-facing forms (transfer, airtime purchase, etc.) shall be fully integrated with the database for creating, reading, updating, and deleting records.
+
+Section 3: Non-Functional Requirements (How the System Shall Behave)
+Progressive Web App (PWA) 
+NFR-UIUX: Mobile-First Design & Usability
+
+NFR-UIUX-01 (Responsive Layout): The entire application interface shall be fully responsive and optimized for mobile devices, using flexible layouts that prevent content overflow on small screens.
+
+NFR-UIUX-02 (Responsive Tables): All data tables (e.g., transaction history) shall be responsive, implementing horizontal scroll on mobile devices for tables with numerous columns.
+
+NFR-UIUX-03 (Touch Targets): All interactive elements (buttons, links, form inputs) shall have a minimum touch target size of 44x44 CSS pixels to ensure usability.
+
+NFR-UIUX-04 (Typography & Spacing): Typography shall be optimized for mobile readability, and sufficient spacing/padding shall be used around elements to create a clean, uncluttered interface suitable for touch interaction.
+
+NFR-RT: Real-Time Performance
+
+NFR-RT-01 (Instant Updates): User balances and transaction histories shall update in the UI in real-time (latency < 1 second) after a transaction is completed.
+
+NFR-RT-02 (Transaction Simulation): During a transfer, after the user enters their PIN, the system shall display a loading or processing state for approximately 5 seconds to simulate bank processing time before showing the success/failure screen.
+
+Transaction Fees: A transaction fee of 1% of the transfer amount shall be applied, with a minimum fee of ₦10. This fee must be clearly displayed to the user before confirming a transaction.

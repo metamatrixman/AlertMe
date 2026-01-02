@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Home, Plus, FileText, ClipboardList } from "lucide-react"
 import { dataStore, type LoanApplication } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface EnhancedLoansScreenProps {
   onBack: () => void
@@ -175,11 +176,11 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-gray-600">Amount</div>
-                      <div className="font-medium">₦{application.amount.toLocaleString()}</div>
+                      <div className="font-medium">₦{formatCurrency(application.amount)}</div>
                     </div>
                     <div>
                       <div className="text-gray-600">Monthly Payment</div>
-                      <div className="font-medium">₦{application.monthlyPayment.toLocaleString()}</div>
+                      <div className="font-medium">₦{formatCurrency(application.monthlyPayment)}</div>
                     </div>
                     <div>
                       <div className="text-gray-600">Term</div>
@@ -235,7 +236,7 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
               />
               {selectedLoanType && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Maximum: ₦{loanTypes.find((t) => t.id === selectedLoanType)?.maxAmount.toLocaleString()}
+                  Maximum: ₦{formatCurrency(loanTypes.find((t) => t.id === selectedLoanType)?.maxAmount || 0)}
                 </p>
               )}
             </div>
@@ -283,15 +284,15 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="opacity-80">Monthly Payment</div>
-                    <div className="text-lg font-bold">₦{loanDetails.monthlyPayment.toLocaleString()}</div>
+                    <div className="text-lg font-bold">₦{formatCurrency(loanDetails.monthlyPayment)}</div>
                   </div>
                   <div>
                     <div className="opacity-80">Total Repayment</div>
-                    <div className="text-lg font-bold">₦{loanDetails.totalRepayment.toLocaleString()}</div>
+                    <div className="text-lg font-bold">₦{formatCurrency(loanDetails.totalRepayment)}</div>
                   </div>
                   <div>
                     <div className="opacity-80">Total Interest</div>
-                    <div className="font-medium">₦{loanDetails.totalInterest.toLocaleString()}</div>
+                    <div className="font-medium">₦{formatCurrency(loanDetails.totalInterest)}</div>
                   </div>
                   <div>
                     <div className="opacity-80">Interest Rate</div>
@@ -325,7 +326,7 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="text-gray-600">Max Amount</div>
-                    <div className="font-medium">₦{loan.maxAmount.toLocaleString()}</div>
+                    <div className="font-medium">₦{formatCurrency(loan.maxAmount)}</div>
                   </div>
                   <div>
                     <div className="text-gray-600">Term</div>

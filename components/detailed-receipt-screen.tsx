@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Download, Share2, Copy, Check } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 import { useToast } from "@/hooks/use-toast"
 
 interface DetailedReceiptScreenProps {
@@ -22,6 +23,9 @@ export function DetailedReceiptScreen({ onBack, transferData }: DetailedReceiptS
     const userData = dataStore.getUserData()
     const currentDate = new Date()
     const receiptNumber = `RCP${Date.now()}`
+    
+    // Use fee from transfer data, or default to 30
+    const transactionFee = transferData?.fee || 30.0
 
     setReceiptData({
       receiptNumber,
@@ -29,8 +33,8 @@ export function DetailedReceiptScreen({ onBack, transferData }: DetailedReceiptS
       date: currentDate.toLocaleDateString(),
       time: currentDate.toLocaleTimeString(),
       amount: Number.parseFloat(transferData?.amount || "0"),
-      fee: 30.0,
-      total: Number.parseFloat(transferData?.amount || "0") + 30.0,
+      fee: transactionFee,
+      total: Number.parseFloat(transferData?.amount || "0") + transactionFee,
       sender: {
         name: userData.name,
         account: userData.accountNumber,
@@ -185,7 +189,7 @@ export function DetailedReceiptScreen({ onBack, transferData }: DetailedReceiptS
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm">Transfer Amount:</span>
-                  <span className="text-sm">₦{receiptData.amount.toLocaleString()}</span>
+                  <span className="text-sm">₦{formatCurrency(receiptData.amount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm">Transaction Fee:</span>
@@ -193,7 +197,7 @@ export function DetailedReceiptScreen({ onBack, transferData }: DetailedReceiptS
                 </div>
                 <div className="flex justify-between font-semibold text-base border-t pt-2">
                   <span>Total Debited:</span>
-                  <span>₦{receiptData.total.toLocaleString()}</span>
+                  <span>₦{formatCurrency(receiptData.total)}</span>
                 </div>
               </div>
             </div>

@@ -1,11 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { formatCurrency } from "@/lib/form-utils"
+import { dataStore } from "@/lib/data-store"
+import { useToast } from "@/hooks/use-toast"
 
 interface AddFundsModalProps {
   isOpen: boolean
@@ -15,14 +18,58 @@ interface AddFundsModalProps {
 export function AddFundsModal({ isOpen, onClose }: AddFundsModalProps) {
   const [amount, setAmount] = useState("")
   const [account, setAccount] = useState("")
-  const [currentBalance, setCurrentBalance] = useState(150000.2)
+  const [currentBalance, setCurrentBalance] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const { toast } = useToast()
 
-  const handleAddFunds = () => {
-    const addAmount = Number.parseFloat(amount)
+  useEffect(() => {
+    // Update currentBalance whenever modal opens or dataStore changes
+    if (isOpen) {
+      setCurrentBalance(dataStore.getUserData().balance)
+    }
+  }, [isOpen])
+
+  const handleAddFunds = async () => {
+    const addAmount = Number(Number.parseFloat(amount).toFixed(2))
     if (addAmount > 0) {
-      setCurrentBalance((prev) => prev + addAmount)
-      setAmount("")
-      onClose()
+      try {
+        setIsProcessing(true)
+
+        // Add transaction record (this automatically updates balance)
+        await dataStore.addTransaction({
+          type: "Account Funding",
+          amount: addAmount,
+          sender: "Fund Addition",
+          status: "Successful",
+          description: `Funds added to account`,
+          isDebit: false,
+          section: "Today",
+          senderBank: "Internal",
+        })
+
+        // Get updated balance after transaction
+        const updatedBalance = dataStore.getUserData().balance
+
+        // Update local state with balance from dataStore
+        setCurrentBalance(updatedBalance)
+        
+        toast({
+          title: "Funds Added Successfully",
+          description: `₦${formatCurrency(addAmount)} has been added to your account`,
+        })
+
+        setAmount("")
+        setAccount("")
+        setIsProcessing(false)
+        onClose()
+      } catch (error) {
+        setIsProcessing(false)
+        toast({
+          title: "Error",
+          description: "Failed to add funds. Please try again.",
+          variant: "destructive",
+        })
+      }
     }
   }
 
@@ -37,7 +84,7 @@ export function AddFundsModal({ isOpen, onClose }: AddFundsModalProps) {
           {/* Current Balance */}
           <div className="bg-[#004A9F] text-white p-4 rounded-lg text-center">
             <div className="text-sm opacity-80">Current Balance</div>
-            <div className="text-2xl font-bold">₦ {currentBalance.toLocaleString()}</div>
+            <div className="text-2xl font-bold">₦ {formatCurrency(currentBalance)}</div>
           </div>
 
           {/* Account Selection */}
@@ -60,18 +107,24 @@ export function AddFundsModal({ isOpen, onClose }: AddFundsModalProps) {
             <Label htmlFor="amount">Amount to Add</Label>
             <Input
               id="amount"
-              type="number"
-              placeholder="Enter amount"
+              inputMode="numeric"
+              step="0.01"
+              placeholder="Enter amount (e.g. 1000.00)"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+              onBlur={() => {
+                if (!amount) return
+                const n = Number(amount)
+                setAmount(Number(n.toFixed(2)).toFixed(2))
+              }}
             />
           </div>
 
           {/* Quick Amount Buttons */}
           <div className="grid grid-cols-3 gap-2">
             {[1000, 5000, 10000].map((quickAmount) => (
-              <Button key={quickAmount} variant="outline" size="sm" onClick={() => setAmount(quickAmount.toString())}>
-                ₦{quickAmount.toLocaleString()}
+              <Button key={quickAmount} variant="outline" size="sm" onClick={() => setAmount(quickAmount.toFixed(2))}>
+                ₦{formatCurrency(quickAmount)}
               </Button>
             ))}
           </div>
@@ -84,9 +137,9 @@ export function AddFundsModal({ isOpen, onClose }: AddFundsModalProps) {
             <Button
               onClick={handleAddFunds}
               className="flex-1 bg-[#A4D233] hover:bg-[#8BC220] text-black"
-              disabled={!amount || !account}
+              disabled={!amount || !account || isProcessing}
             >
-              Add Funds
+              {isProcessing ? "Processing..." : "Add Funds"}
             </Button>
           </div>
         </div>

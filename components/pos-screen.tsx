@@ -148,10 +148,16 @@ export function POSScreen({ onBack, onNavigate }: POSScreenProps) {
                 <Label htmlFor="amount">Amount (₦)</Label>
                 <Input
                   id="amount"
-                  type="number"
+                  inputMode="numeric"
+                  step="0.01"
+                  placeholder="Enter amount (e.g. 1000.00)"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter amount"
+                  onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+                  onBlur={() => {
+                    if (!amount) return
+                    const n = Number(amount)
+                    setAmount(Number(n.toFixed(2)).toFixed(2))
+                  }}
                 />
               </div>
 
@@ -234,7 +240,7 @@ export function POSScreen({ onBack, onNavigate }: POSScreenProps) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium">₦{transaction.amount.toLocaleString()}</div>
+                  <div className="font-medium">₦{formatCurrency(transaction.amount)}</div>
                   <div className="text-xs text-green-600">{transaction.status}</div>
                 </div>
               </div>

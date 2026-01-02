@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { ArrowLeft, CreditCard, Smartphone, Building2, Home, Plus } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 import { useToast } from "@/hooks/use-toast"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface AddMoneyScreenProps {
   onBack: () => void
@@ -72,13 +73,9 @@ export function AddMoneyScreen({ onBack, onNavigate }: AddMoneyScreenProps) {
 
     // Simulate processing for 3 seconds
     setTimeout(async () => {
-      const fundAmount = Number.parseFloat(amount)
-      const currentBalance = dataStore.getUserData().balance
+      const fundAmount = Number(Number.parseFloat(amount).toFixed(2))
 
-      // Update balance
-      dataStore.updateBalance(currentBalance + fundAmount)
-
-      // Add transaction record
+      // Add transaction record (this automatically updates balance)
       await dataStore.addTransaction({
         type: "Account Funding",
         amount: fundAmount,
@@ -94,7 +91,7 @@ export function AddMoneyScreen({ onBack, onNavigate }: AddMoneyScreenProps) {
 
       toast({
         title: "Funding Successful",
-        description: `₦${fundAmount.toLocaleString()} has been added to your account`,
+        description: `₦${formatCurrency(fundAmount)} has been added to your account`,
       })
 
       // Reset form
@@ -141,7 +138,7 @@ export function AddMoneyScreen({ onBack, onNavigate }: AddMoneyScreenProps) {
         <Card className="bg-gradient-to-r from-[#004A9F] to-[#0072C6] text-white">
           <CardContent className="p-4 text-center">
             <div className="text-sm opacity-80">Current Balance</div>
-            <div className="text-2xl font-bold">₦ {dataStore.getUserData().balance.toLocaleString()}</div>
+            <div className="text-2xl font-bold">₦ {formatCurrency(dataStore.getUserData().balance)}</div>
           </CardContent>
         </Card>
 
@@ -187,10 +184,16 @@ export function AddMoneyScreen({ onBack, onNavigate }: AddMoneyScreenProps) {
               <Label htmlFor="amount">Amount (₦)</Label>
               <Input
                 id="amount"
-                type="number"
-                placeholder="Enter amount"
+                inputMode="numeric"
+                step="0.01"
+                placeholder="Enter amount (e.g. 1000.00)"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+                onBlur={() => {
+                  if (!amount) return
+                  const n = Number(amount)
+                  setAmount(Number(n.toFixed(2)).toFixed(2))
+                }}
               />
             </div>
 
@@ -204,7 +207,7 @@ export function AddMoneyScreen({ onBack, onNavigate }: AddMoneyScreenProps) {
                   onClick={() => setAmount(quickAmount.toString())}
                   className="text-xs"
                 >
-                  ₦{quickAmount.toLocaleString()}
+                  ₦{formatCurrency(quickAmount)}
                 </Button>
               ))}
             </div>

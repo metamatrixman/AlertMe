@@ -7,91 +7,95 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Eye, EyeOff, Sparkles, Shield, ChevronRight } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { z } from "zod"
+import { emailSchema, nameSchema, accountNumberSchema, phoneSchema, pinSchema, getErrorMessage } from "@/lib/form-utils"
+import { useValidatedForm } from "@/hooks/use-validated-form"
+import Form, { FormError } from "@/components/ui/form"
+import { useToast } from "@/hooks/use-toast"
 
 interface RegistrationScreenProps {
   onRegister: () => void
   onBackToLogin: () => void
 }
 
+const registrationSchema = z
+  .object({
+    email: emailSchema,
+    fullName: nameSchema,
+    accountNumber: accountNumberSchema,
+    phone: phoneSchema,
+    pin: pinSchema,
+    confirmPin: z.string(),
+  })
+  .refine((v) => v.pin === v.confirmPin, { message: "PINs do not match", path: ["confirmPin"] })
+
 export function RegistrationScreen({ onRegister, onBackToLogin }: RegistrationScreenProps) {
   const [step, setStep] = useState<"email" | "details" | "pin">("email")
-  const [formData, setFormData] = useState({
-    email: "",
-    fullName: "",
-    accountNumber: "",
-    phone: "",
-    pin: "",
-    confirmPin: "",
-  })
   const [showPin, setShowPin] = useState(false)
   const [showConfirmPin, setShowConfirmPin] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
-  const handleEmailSubmit = () => {
-    setError("")
-    if (!formData.email.trim()) {
-      setError("Email is required")
-      return
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError("Please enter a valid email")
-      return
-    }
-    setStep("details")
+  const methods = useValidatedForm(registrationSchema, {
+    defaultValues: {
+      email: "",
+      fullName: "",
+      accountNumber: "",
+      phone: "",
+      pin: "",
+      confirmPin: "",
+    },
+  })
+
+  const { getValues, trigger, setValue } = methods
+
+  const handleEmailSubmit = async () => {
+    const ok = await trigger("email")
+    if (ok) setStep("details")
   }
 
-  const handleDetailsSubmit = () => {
-    setError("")
-    if (!formData.fullName.trim()) {
-      setError("Full name is required")
-      return
-    }
-    if (!formData.accountNumber.trim() || formData.accountNumber.length < 10) {
-      setError("Account number must be at least 10 digits")
-      return
-    }
-    if (!formData.phone.trim()) {
-      setError("Phone number is required")
-      return
-    }
-    setStep("pin")
+  const handleDetailsSubmit = async () => {
+    const ok = await trigger(["fullName", "accountNumber", "phone"])
+    if (ok) setStep("pin")
   }
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     setError("")
-    if (formData.pin.length !== 4 || !/^\d+$/.test(formData.pin)) {
-      setError("PIN must be exactly 4 digits")
-      return
-    }
-    if (formData.pin !== formData.confirmPin) {
-      setError("PINs do not match")
-      return
-    }
+    const ok = await trigger()
+    if (!ok) return
 
     setIsLoading(true)
-    setTimeout(() => {
-      dataStore.registerNewAccount({
-        name: formData.fullName,
-        accountNumber: formData.accountNumber,
-        email: formData.email,
-        phone: formData.phone,
-        pin: formData.pin,
-      })
-      setIsLoading(false)
+    try {
+      const values = getValues()
+      // sanitize inputs
+      const payload = {
+        name: values.fullName.trim(),
+        accountNumber: values.accountNumber.trim(),
+        email: values.email.trim(),
+        phone: values.phone.trim(),
+        pin: values.pin,
+      }
+      dataStore.registerNewAccount(payload)
+      toast({ title: "Account created", description: "Your account was created successfully." })
       onRegister()
-    }, 2000)
+    } catch (err) {
+      console.error("Registration failed", err)
+      const msg = getErrorMessage(err)
+      setError(msg)
+      toast({ title: "Registration failed", description: msg, variant: "destructive" })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>, field: "pin" | "confirmPin") => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 4)
-    setFormData({ ...formData, [field]: value })
+    setValue(field, value)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-    setError("")
+  const handleInputChange = (name: string, value: string) => {
+    setValue(name as any, value)
   }
 
   return (
@@ -139,146 +143,168 @@ export function RegistrationScreen({ onRegister, onBackToLogin }: RegistrationSc
             )}
 
             {step === "email" && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold text-gray-800">Create Account</h2>
-                <p className="text-gray-600 text-sm">Step 1 of 3: Email Address</p>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Enter email address"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
-                />
-                <Button
-                  onClick={handleEmailSubmit}
-                  className="w-full h-12 bg-gradient-to-r from-[#A4D233] to-[#8BC220] hover:from-[#8BC220] hover:to-[#7AB01F] text-black font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-                >
-                  Continue
-                  <ChevronRight className="h-4 w-4 ml-2" />
-                </Button>
-              </div>
-            )}
-
-            {step === "details" && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold text-gray-800">Create Account</h2>
-                <p className="text-gray-600 text-sm">Step 2 of 3: Account Details</p>
-                <Input
-                  type="text"
-                  name="fullName"
-                  placeholder="Enter full name"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
-                />
-                <Input
-                  type="text"
-                  name="accountNumber"
-                  placeholder="Enter account number (10+ digits)"
-                  value={formData.accountNumber}
-                  onChange={handleInputChange}
-                  className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
-                />
-                <Input
-                  type="tel"
-                  name="phone"
-                  placeholder="Enter phone number"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
-                />
-                <div className="flex gap-2 pt-2">
+              <Form methods={methods} onSubmit={() => {}}>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold text-gray-800">Create Account</h2>
+                  <p className="text-gray-600 text-sm">Step 1 of 3: Email Address</p>
+                  <Input
+                    type="email"
+                    placeholder="Enter email address"
+                    {...methods.register("email")}
+                    className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                  />
+                  <FormError name="email" />
                   <Button
-                    onClick={() => setStep("email")}
-                    variant="outline"
-                    className="flex-1 h-12 rounded-xl border-2 border-gray-200 hover:border-gray-300"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    onClick={handleDetailsSubmit}
-                    className="flex-1 h-12 bg-gradient-to-r from-[#A4D233] to-[#8BC220] hover:from-[#8BC220] hover:to-[#7AB01F] text-black font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                    type="button"
+                    onClick={handleEmailSubmit}
+                    className="w-full h-12 bg-gradient-to-r from-[#A4D233] to-[#8BC220] hover:from-[#8BC220] hover:to-[#7AB01F] text-black font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
                   >
                     Continue
                     <ChevronRight className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
-              </div>
+              </Form>
+            )}
+
+            {step === "details" && (
+              <Form methods={methods} onSubmit={() => {}}>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold text-gray-800">Create Account</h2>
+                  <p className="text-gray-600 text-sm">Step 2 of 3: Account Details</p>
+                  <Input
+                    type="text"
+                    placeholder="Enter full name"
+                    {...methods.register("fullName")}
+                    className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                  />
+                  <FormError name="fullName" />
+                  <Input
+                    type="text"
+                    placeholder="Enter account number (10 digits)"
+                    inputMode="numeric"
+                    maxLength={10}
+                    pattern="\d{10}"
+                    {...methods.register("accountNumber")}
+                    className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                    onChange={(e) => methods.setValue("accountNumber", e.target.value.replace(/\D/g, "").slice(0,10))}
+                  />
+                  <FormError name="accountNumber" />
+                  <Input
+                    type="tel"
+                    placeholder="+2348012345678"
+                    inputMode="tel"
+                    maxLength={14}
+                    pattern="\+\d{13}"
+                    {...methods.register("phone")}
+                    className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                    onChange={(e) => {
+                      let val = e.target.value
+                      if (!val.startsWith("+")) {
+                        val = "+" + val.replace(/\D/g, "")
+                      } else {
+                        val = "+" + val.slice(1).replace(/\D/g, "")
+                      }
+                      methods.setValue("phone", val.slice(0,14))
+                    }}
+                  />
+                  <FormError name="phone" />
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      onClick={() => setStep("email")}
+                      variant="outline"
+                      className="flex-1 h-12 rounded-xl border-2 border-gray-200 hover:border-gray-300"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleDetailsSubmit}
+                      className="flex-1 h-12 bg-gradient-to-r from-[#A4D233] to-[#8BC220] hover:from-[#8BC220] hover:to-[#7AB01F] text-black font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                    >
+                      Continue
+                      <ChevronRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </Form>
             )}
 
             {step === "pin" && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold text-gray-800">Create Account</h2>
-                <p className="text-gray-600 text-sm">Step 3 of 3: Set Your PIN</p>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 block">Create 4-Digit PIN</label>
-                  <div className="relative">
-                    <Input
-                      type={showPin ? "text" : "password"}
-                      placeholder="Enter PIN"
-                      value={formData.pin}
-                      onChange={(e) => handlePinChange(e, "pin")}
-                      maxLength={4}
-                      className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 pr-12"
-                    />
+              <Form methods={methods} onSubmit={handleRegister}>
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold text-gray-800">Create Account</h2>
+                  <p className="text-gray-600 text-sm">Step 3 of 3: Set Your PIN</p>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 block">Create 4-Digit PIN</label>
+                    <div className="relative">
+                      <Input
+                        type={showPin ? "text" : "password"}
+                        placeholder="Enter PIN"
+                        {...methods.register("pin")}
+                        maxLength={4}
+                        className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 pr-12"
+                        onChange={(e) => handlePinChange(e as any, "pin")}
+                      />
+                      <FormError name="pin" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowPin(!showPin)}
+                      >
+                        {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 block">Confirm PIN</label>
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPin ? "text" : "password"}
+                        placeholder="Confirm PIN"
+                        {...methods.register("confirmPin")}
+                        maxLength={4}
+                        className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 pr-12"
+                        onChange={(e) => handlePinChange(e as any, "confirmPin")}
+                      />
+                      <FormError name="confirmPin" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowConfirmPin(!showConfirmPin)}
+                      >
+                        {showConfirmPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-2">
                     <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700"
-                      onClick={() => setShowPin(!showPin)}
+                      onClick={() => setStep("details")}
+                      variant="outline"
+                      className="flex-1 h-12 rounded-xl border-2 border-gray-200 hover:border-gray-300"
                     >
-                      {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      Back
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex-1 h-12 bg-gradient-to-r from-[#A4D233] to-[#8BC220] hover:from-[#8BC220] hover:to-[#7AB01F] text-black font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                          Creating...
+                        </div>
+                      ) : (
+                        "Create Account"
+                      )}
                     </Button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 block">Confirm PIN</label>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPin ? "text" : "password"}
-                      placeholder="Confirm PIN"
-                      value={formData.confirmPin}
-                      onChange={(e) => handlePinChange(e, "confirmPin")}
-                      maxLength={4}
-                      className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 pr-12"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700"
-                      onClick={() => setShowConfirmPin(!showConfirmPin)}
-                    >
-                      {showConfirmPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    onClick={() => setStep("details")}
-                    variant="outline"
-                    className="flex-1 h-12 rounded-xl border-2 border-gray-200 hover:border-gray-300"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    onClick={handleRegister}
-                    disabled={isLoading}
-                    className="flex-1 h-12 bg-gradient-to-r from-[#A4D233] to-[#8BC220] hover:from-[#8BC220] hover:to-[#7AB01F] text-black font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                        Creating...
-                      </div>
-                    ) : (
-                      "Create Account"
-                    )}
-                  </Button>
-                </div>
-              </div>
+              </Form>
             )}
 
             <div className="text-center pt-4 border-t border-gray-200">

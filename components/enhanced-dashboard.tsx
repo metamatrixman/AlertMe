@@ -22,6 +22,7 @@ import {
   ChevronDown,
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface EnhancedDashboardProps {
   onNavigate: (screen: string, id?: string) => void
@@ -47,7 +48,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
   }, [])
 
   const formatBalance = (balance: number) => {
-    return showBalance ? `₦ ${balance.toLocaleString()}` : "₦ ****"
+    return showBalance ? `₦ ${formatCurrency(balance)}` : "₦ ****"
   }
 
   const handleQuickAction = (action: string) => {
@@ -272,7 +273,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
                   </div>
                   <div className="text-right">
                     <div className={`font-semibold text-sm ${transaction.isDebit ? "text-red-600" : "text-green-600"}`}>
-                      {transaction.isDebit ? "- " : "+ "}₦ {transaction.amount.toLocaleString()}
+                      {transaction.isDebit ? "- " : "+ "}₦ {formatCurrency(transaction.amount)}
                     </div>
                     <div
                       className={`text-xs font-medium ${

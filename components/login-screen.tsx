@@ -9,49 +9,70 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Eye, EyeOff, Sparkles, Shield } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { z } from "zod"
+import { accountNumberSchema, pinSchema, getErrorMessage } from "@/lib/form-utils"
+import { useValidatedForm } from "@/hooks/use-validated-form"
+import Form, { FormError } from "@/components/ui/form"
+import { useToast } from "@/hooks/use-toast"
 
 interface LoginScreenProps {
   onLogin: () => void
 }
 
+const loginSchema = z.object({
+  accountNumber: accountNumberSchema,
+  pin: pinSchema,
+})
+
 export function LoginScreen({ onLogin }: LoginScreenProps) {
-  const [credentials, setCredentials] = useState({
-    accountNumber: "",
-    pin: "",
+  const methods = useValidatedForm(loginSchema, {
+    defaultValues: { accountNumber: "", pin: "" },
   })
+
+  const { getValues, trigger } = methods
   const [showPin, setShowPin] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [showRegistration, setShowRegistration] = useState(false)
+  const { toast } = useToast()
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError("")
+    const ok = await trigger()
+    if (!ok) return
 
-    if (!credentials.accountNumber.trim()) {
-      setError("Account number is required")
-      return
-    }
-    if (credentials.pin.length !== 4 || !/^\d+$/.test(credentials.pin)) {
-      setError("PIN must be exactly 4 digits")
-      return
-    }
+    setIsLoading(true)
+    try {
+      const values = getValues()
+      const userData = dataStore.getUserData()
 
-    const userData = dataStore.getUserData()
+      const accountInput = values.accountNumber.trim()
+      const pinInput = (values.pin || "").toString().trim()
 
-    if (credentials.accountNumber.trim() === userData.accountNumber && credentials.pin === "1234") {
-      setIsLoading(true)
-      setTimeout(() => {
+      if (accountInput === userData.accountNumber && pinInput === "1234") {
+        toast({ title: "Signed in", description: "Welcome back!" })
+        // simulate network delay for demo
+        setTimeout(() => {
+          setIsLoading(false)
+          onLogin()
+        }, 800)
+      } else {
+        const msg = "Invalid account number or PIN"
+        setError(msg)
+        toast({ title: "Sign in failed", description: msg, variant: "destructive" })
         setIsLoading(false)
-        onLogin()
-      }, 2000)
-    } else {
-      setError("Invalid account number or PIN")
+      }
+    } catch (err) {
+      const msg = getErrorMessage(err)
+      setError(msg)
+      toast({ title: "Sign in failed", description: msg, variant: "destructive" })
+      setIsLoading(false)
     }
   }
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 4)
-    setCredentials({ ...credentials, pin: value })
+    methods.setValue("pin", value)
   }
 
   if (showRegistration) {
@@ -94,48 +115,56 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
             )}
 
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 mb-2 block">Account Number</label>
-                <Input
-                  type="text"
-                  placeholder="Enter account number"
-                  value={credentials.accountNumber}
-                  onChange={(e) => {
-                    setCredentials({ ...credentials, accountNumber: e.target.value })
-                    setError("")
-                  }}
-                  className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-gray-300"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 mb-2 block">4-Digit PIN</label>
-                <div className="relative">
+            <Form methods={methods} onSubmit={handleLogin}>
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 mb-2 block">Account Number</label>
                   <Input
-                    type={showPin ? "text" : "password"}
-                    placeholder="Enter PIN"
-                    value={credentials.pin}
-                    onChange={handlePinChange}
-                    maxLength={4}
-                    className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-gray-300 pr-12"
+                    type="text"
+                    placeholder="Enter account number"
+                    inputMode="numeric"
+                    maxLength={10}
+                    pattern="\d{10}"
+                    {...methods.register("accountNumber")}
+                    className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-gray-300"
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0,10)
+                      methods.setValue("accountNumber", val)
+                      setError("")
+                    }}
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700 rounded-lg"
-                    onClick={() => setShowPin(!showPin)}
-                  >
-                    {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+                  <FormError name="accountNumber" />
                 </div>
-                <p className="text-xs text-gray-500">Default PIN for demo: 1234</p>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 mb-2 block">4-Digit PIN</label>
+                  <div className="relative">
+                    <Input
+                      type={showPin ? "text" : "password"}
+                      placeholder="Enter PIN"
+                      {...methods.register("pin")}
+                      onChange={handlePinChange}
+                      maxLength={4}
+                      className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-gray-300 pr-12"
+                    />
+                    <FormError name="pin" />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700 rounded-lg"
+                      onClick={() => setShowPin(!showPin)}
+                    >
+                      {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500">Default PIN for demo: 1234</p>
+                </div>
               </div>
-            </div>
+            </Form>
 
             <Button
-              onClick={handleLogin}
+              onClick={methods.handleSubmit(handleLogin)}
               disabled={isLoading}
               className="w-full h-12 bg-gradient-to-r from-[#A4D233] to-[#8BC220] hover:from-[#8BC220] hover:to-[#7AB01F] text-black font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Camera, Edit, Save, X } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 import { StorageManager } from "@/lib/storage-manager"
 
 interface ProfileScreenProps {
@@ -143,7 +144,7 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
               </div>
               <div>
                 <Label className="text-sm text-gray-600">Current Balance</Label>
-                <div className="font-medium text-[#004A9F]">₦ {profile.balance.toLocaleString()}</div>
+                <div className="font-medium text-[#004A9F]">₦ {formatCurrency(profile.balance)}</div>
               </div>
             </div>
             <div>

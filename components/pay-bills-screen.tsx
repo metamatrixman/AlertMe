@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Zap, Wifi, Tv, Phone, Car, Home, Receipt } from "lucide-react"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface PayBillsScreenProps {
   onBack: () => void
@@ -149,6 +150,7 @@ export function PayBillsScreen({ onBack, onNavigate }: PayBillsScreenProps) {
                 <Label htmlFor="customer-id">Customer ID / Phone Number</Label>
                 <Input
                   id="customer-id"
+                  inputMode="tel"
                   value={customerID}
                   onChange={(e) => setCustomerID(e.target.value)}
                   placeholder="Enter customer ID or phone number"
@@ -159,10 +161,16 @@ export function PayBillsScreen({ onBack, onNavigate }: PayBillsScreenProps) {
                 <Label htmlFor="amount">Amount (₦)</Label>
                 <Input
                   id="amount"
-                  type="number"
+                  inputMode="numeric"
+                  step="0.01"
+                  placeholder="Enter amount (e.g. 1000.00)"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter amount"
+                  onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+                  onBlur={() => {
+                    if (!amount) return
+                    const n = Number(amount)
+                    setAmount(Number(n.toFixed(2)).toFixed(2))
+                  }}
                 />
               </div>
 
@@ -197,7 +205,7 @@ export function PayBillsScreen({ onBack, onNavigate }: PayBillsScreenProps) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium">₦{bill.amount.toLocaleString()}</div>
+                  <div className="font-medium">₦{formatCurrency(bill.amount)}</div>
                   <div className="text-xs text-green-600">{bill.status}</div>
                 </div>
               </div>

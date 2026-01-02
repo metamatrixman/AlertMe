@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ArrowLeft, Plus, Edit, Trash2, Search } from "lucide-react"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface Beneficiary {
   id: string
@@ -224,7 +225,7 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-right mr-2">
-                    <div className="text-sm font-medium">₦{beneficiary.balance.toLocaleString()}</div>
+                    <div className="text-sm font-medium">₦{formatCurrency(beneficiary.balance)}</div>
                     <div className="text-xs text-gray-500">{beneficiary.phone}</div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => handleEditBeneficiary(beneficiary)}>
@@ -295,6 +296,19 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
                 value={newBeneficiary.phone || ""}
                 onChange={(e) => setNewBeneficiary({ ...newBeneficiary, phone: e.target.value })}
                 placeholder="Enter phone number"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="balance">Balance (₦)</Label>
+              <Input
+                id="balance"
+                type="number"
+                inputMode="numeric"
+                step="0.01"
+                value={newBeneficiary.balance || ""}
+                onChange={(e) => setNewBeneficiary({ ...newBeneficiary, balance: Number(e.target.value) || 0 })}
+                placeholder="Enter balance"
               />
             </div>
 

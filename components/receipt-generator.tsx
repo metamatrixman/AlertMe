@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ArrowLeft, Plus, Download, Share2, Eye, Trash2 } from "lucide-react"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface Receipt {
   id: string
@@ -111,7 +112,7 @@ export function ReceiptGenerator({ onBack }: ReceiptGeneratorProps) {
           <h3 style="margin: 0 0 15px 0;">${receipt.title}</h3>
           
           <div style="margin-bottom: 10px;">
-            <strong>Amount:</strong> ₦${receipt.amount.toLocaleString()}
+            <strong>Amount:</strong> ₦${formatCurrency(receipt.amount)}
           </div>
           
           <div style="margin-bottom: 10px;">
@@ -169,7 +170,7 @@ export function ReceiptGenerator({ onBack }: ReceiptGeneratorProps) {
           <Card className="text-center">
             <CardContent className="p-4">
               <div className="text-lg font-bold text-[#00B2A9]">
-                ₦{receipts.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}
+                ₦{formatCurrency(receipts.reduce((sum, r) => sum + r.amount, 0))}
               </div>
               <div className="text-xs text-gray-600">Total Amount</div>
             </CardContent>
@@ -211,7 +212,7 @@ export function ReceiptGenerator({ onBack }: ReceiptGeneratorProps) {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="text-gray-600">Amount</div>
-                    <div className="font-medium">₦{receipt.amount.toLocaleString()}</div>
+                    <div className="font-medium">₦{formatCurrency(receipt.amount)}</div>
                   </div>
                   <div>
                     <div className="text-gray-600">Recipient</div>

@@ -3,6 +3,7 @@
 import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ChevronDown, Home } from "lucide-react"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface TransferScreenProps {
   onBack: () => void
@@ -50,7 +51,6 @@ function TransferScreenComponent({ onBack, onNavigate, transferData }: TransferS
           <label className="text-sm font-medium text-gray-700 mb-2 block">To Beneficiary</label>
           <div className="bg-gray-100 rounded-lg p-4">
             <div className="font-medium text-sm mb-1">{transferData?.beneficiaryName || "Pedro Banabas"}</div>
-            <div className="text-xs text-gray-600 mb-2">{transferData?.accountNumber || "0348483930"}</div>
             <div className="text-xs text-gray-500">{transferData?.bank || "Firstbank"}</div>
           </div>
         </div>
@@ -60,7 +60,7 @@ function TransferScreenComponent({ onBack, onNavigate, transferData }: TransferS
           <label className="text-sm font-medium text-gray-700 mb-2 block">Amount</label>
           <div className="bg-gray-100 rounded-lg p-4">
             <div className="text-2xl font-bold">
-              ₦ {transferData?.amount ? Number.parseFloat(transferData.amount).toLocaleString() : "0.00"}
+              ₦ {transferData?.amount ? formatCurrency(Number.parseFloat(transferData.amount)) : "0.00"}
             </div>
           </div>
           <div className="text-right mt-2">

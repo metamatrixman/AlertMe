@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, CreditCard, Plus, Eye, EyeOff, Copy, Settings, Trash2, Lock, Unlock, Home } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface VirtualCard {
   id: string
@@ -156,7 +157,7 @@ export function VirtualCardsScreen({ onBack, onNavigate }: VirtualCardsScreenPro
           <Card className="text-center">
             <CardContent className="p-4">
               <div className="text-lg font-bold text-[#A4D233]">
-                ₦{cards.reduce((sum, card) => sum + card.balance, 0).toLocaleString()}
+                ₦{formatCurrency(cards.reduce((sum, card) => sum + card.balance, 0))}
               </div>
               <div className="text-xs text-gray-600">Total Balance</div>
             </CardContent>
@@ -209,7 +210,7 @@ export function VirtualCardsScreen({ onBack, onNavigate }: VirtualCardsScreenPro
                     </div>
                     <div className="text-right">
                       <div className="text-xs opacity-60">BALANCE</div>
-                      <div className="text-lg font-bold">₦{card.balance.toLocaleString()}</div>
+                      <div className="text-lg font-bold">₦{formatCurrency(card.balance)}</div>
                     </div>
                   </div>
                 </div>

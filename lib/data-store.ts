@@ -3,6 +3,7 @@
 import { generateDebitAlert, generateCreditAlert } from "./alert-templates"
 import { sendTransactionAlert } from "./sms-client"
 import { StorageManager } from "./storage-manager"
+import { formatCurrency } from "@/lib/form-utils"
 
 export interface Transaction {
   id: string
@@ -256,164 +257,59 @@ class DataStore {
         },
         {
           id: "13",
-          name: "Kwame Asante",
-          accountNumber: "1012345678",
-          bank: "Zenith Bank",
+          name: "Kunle Adebayo",
+          accountNumber: "1923456789",
+          bank: "United Bank for Africa",
           phone: "+234 822 123 4567",
         },
         {
           id: "14",
-          name: "Folake Adebayo",
-          accountNumber: "2012345678",
-          bank: "United Bank for Africa",
+          name: "Fatima Hassan",
+          accountNumber: "2034567890",
+          bank: "First Bank",
           phone: "+234 823 789 0123",
         },
         {
           id: "15",
-          name: "Seun Adeleke",
-          accountNumber: "3012345678",
+          name: "Victor Oluwole",
+          accountNumber: "3145678901",
           bank: "GTBank",
-          phone: "+234 824 567 8901",
+          phone: "+234 824 456 7890",
         },
         {
           id: "16",
-          name: "Jennifer Obi",
-          accountNumber: "4012345678",
-          bank: "Fidelity Bank",
-          phone: "+234 825 234 5678",
+          name: "Ngozi Okeke",
+          accountNumber: "4256789012",
+          bank: "Zenith Bank",
+          phone: "+234 825 012 3456",
         },
         {
           id: "17",
-          name: "Emeka Nkosi",
-          accountNumber: "5012345678",
-          bank: "FCMB",
-          phone: "+234 826 890 1234",
+          name: "Emmanuel Obi",
+          accountNumber: "5367890123",
+          bank: "Ecobank",
+          phone: "+234 826 678 9012",
         },
         {
           id: "18",
-          name: "Patience Ogbonna",
-          accountNumber: "6012345678",
-          bank: "Ecobank",
-          phone: "+234 827 456 7890",
+          name: "Grace Ayokunle",
+          accountNumber: "6478901234",
+          bank: "Fidelity Bank",
+          phone: "+234 827 345 6789",
         },
         {
           id: "19",
-          name: "Ibrahim Hassan",
-          accountNumber: "7012345678",
-          bank: "Sterling Bank",
-          phone: "+234 828 123 4567",
+          name: "Samuel Ifeanyi",
+          accountNumber: "7589012345",
+          bank: "Access Bank",
+          phone: "+234 828 901 2345",
         },
         {
           id: "20",
-          name: "Oluwatoyin Akinyemi",
-          accountNumber: "8012345678",
-          bank: "Access Bank",
-          phone: "+234 829 789 0123",
-        },
-        {
-          id: "21",
-          name: "Amina Yusuf",
-          accountNumber: "8112345678",
-          bank: "Union Bank",
-          phone: "+234 830 123 4567",
-        },
-        {
-          id: "22",
-          name: "Bright Okeke",
-          accountNumber: "8223456789",
-          bank: "First Bank",
-          phone: "+234 831 234 5678",
-        },
-        {
-          id: "23",
-          name: "Cynthia Egbuna",
-          accountNumber: "8334567890",
-          bank: "Wema Bank",
-          phone: "+234 832 345 6789",
-        },
-        {
-          id: "24",
-          name: "Daniel Ojo",
-          accountNumber: "8445678901",
-          bank: "Stanbic IBTC",
-          phone: "+234 833 456 7890",
-        },
-        {
-          id: "25",
-          name: "Esther Abiola",
-          accountNumber: "8556789012",
-          bank: "Keystone Bank",
-          phone: "+234 834 567 8901",
-        },
-        {
-          id: "26",
-          name: "Frank Mensah",
-          accountNumber: "8667890123",
-          bank: "First City Monument Bank",
-          phone: "+234 835 678 9012",
-        },
-        {
-          id: "27",
-          name: "Grace Nwankwo",
-          accountNumber: "8778901234",
-          bank: "Polaris Bank",
-          phone: "+234 836 789 0123",
-        },
-        {
-          id: "28",
-          name: "Halima Bello",
-          accountNumber: "8889012345",
-          bank: "Ecobank",
-          phone: "+234 837 890 1234",
-        },
-        {
-          id: "29",
-          name: "Ifeanyi Obi",
-          accountNumber: "8990123456",
-          bank: "Guaranty Trust Bank",
-          phone: "+234 838 901 2345",
-        },
-        {
-          id: "30",
-          name: "Jide Afolayan",
-          accountNumber: "9001234567",
-          bank: "Zenith Bank",
-          phone: "+234 839 012 3456",
-        },
-        {
-          id: "31",
-          name: "Kemi Adegoke",
-          accountNumber: "9112345670",
-          bank: "United Bank for Africa",
-          phone: "+234 840 123 4567",
-        },
-        {
-          id: "32",
-          name: "Lukman Salisu",
-          accountNumber: "9223456781",
-          bank: "FCMB",
-          phone: "+234 841 234 5678",
-        },
-        {
-          id: "33",
-          name: "Mariama Conteh",
-          accountNumber: "9334567892",
-          bank: "Fidelity Bank",
-          phone: "+234 842 345 6789",
-        },
-        {
-          id: "34",
-          name: "Nelson Ade",
-          accountNumber: "9445678903",
+          name: "Cynthia Obinna",
+          accountNumber: "8690123456",
           bank: "Sterling Bank",
-          phone: "+234 843 456 7890",
-        },
-        {
-          id: "35",
-          name: "Oluchi Eze",
-          accountNumber: "9556789014",
-          bank: "Union Bank",
-          phone: "+234 844 567 8901",
+          phone: "+234 829 567 8901",
         },
       ],
       notifications: [],
@@ -432,7 +328,7 @@ class DataStore {
 
   private loadFromStorage(): AppState {
     try {
-      const stored = StorageManager.loadSync(this.STORAGE_KEY, null)
+      const stored: any = StorageManager.loadSync(this.STORAGE_KEY, null)
       if (stored) {
         // Validate version and migrate if needed
         if (stored.version !== this.VERSION) {
@@ -493,7 +389,7 @@ class DataStore {
 
   subscribe(listener: () => void) {
     this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
+    return () => { this.listeners.delete(listener) }
   }
 
   private notify() {
@@ -519,7 +415,8 @@ class DataStore {
   }
 
   updateBalance(newBalance: number): void {
-    this.state.userData.balance = newBalance
+    // Ensure balance is stored with two decimals to prevent floating point drift
+    this.state.userData.balance = Number(Number(newBalance).toFixed(2))
     this.notify()
   }
 
@@ -563,7 +460,7 @@ class DataStore {
     return this.state.transactions.find((t) => t.id === id)
   }
 
-  async addTransaction(transaction: Omit<Transaction, "id" | "reference">): Promise<string> {
+  async addTransaction(transaction: Omit<Transaction, "id" | "reference" | "date" | "time">): Promise<string> {
     const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     const reference = `TXN${Date.now().toString().slice(-9)}`
 
@@ -575,13 +472,19 @@ class DataStore {
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     }
 
+    // Ensure amount and fee are numbers rounded to 2 decimals
+    newTransaction.amount = Number(Number(newTransaction.amount).toFixed(2))
+    if (newTransaction.fee !== undefined) newTransaction.fee = Number(Number(newTransaction.fee).toFixed(2))
+
     this.state.transactions.unshift(newTransaction)
 
-    // Update balance
+    // Update balance with precise rounding to avoid float accumulation
     if (newTransaction.isDebit) {
-      this.state.userData.balance -= newTransaction.amount + (newTransaction.fee || 0)
+      const delta = -(newTransaction.amount + (newTransaction.fee || 0))
+      this.state.userData.balance = Number((this.state.userData.balance + delta).toFixed(2))
     } else {
-      this.state.userData.balance += newTransaction.amount
+      const delta = newTransaction.amount
+      this.state.userData.balance = Number((this.state.userData.balance + delta).toFixed(2))
     }
 
     // Send SMS notifications if enabled
@@ -622,7 +525,7 @@ class DataStore {
     // Add in-app notification
     this.addNotification({
       title: newTransaction.isDebit ? "Money Sent" : "Money Received",
-      message: `₦${newTransaction.amount.toLocaleString()} ${newTransaction.isDebit ? "sent to" : "received from"} ${newTransaction.recipient || newTransaction.sender}`,
+      message: `₦${formatCurrency(newTransaction.amount)} ${newTransaction.isDebit ? "sent to" : "received from"} ${newTransaction.recipient || newTransaction.sender}`,
       type: "success",
     })
 
@@ -694,7 +597,7 @@ class DataStore {
 
     this.addNotification({
       title: "Loan Application Submitted",
-      message: `Your ${application.type} application for ₦${application.amount.toLocaleString()} has been submitted`,
+      message: `Your ${application.type} application for ₦${formatCurrency(application.amount)} has been submitted`, 
       type: "info",
     })
 
@@ -746,7 +649,7 @@ class DataStore {
 
   async importData(jsonData: string): Promise<boolean> {
     try {
-      const importedData = JSON.parse(jsonData)
+      const importedData: any = JSON.parse(jsonData)
 
       if (importedData.version !== this.VERSION) {
         console.warn("Imported data version mismatch, attempting migration")
@@ -764,7 +667,7 @@ class DataStore {
 
   async restoreFromBackup(): Promise<boolean> {
     try {
-      const backup = StorageManager.loadSync(this.BACKUP_KEY, null)
+      const backup: any = StorageManager.loadSync(this.BACKUP_KEY, null)
       if (!backup) return false
 
       this.state = backup.data

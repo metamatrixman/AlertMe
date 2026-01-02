@@ -16,8 +16,10 @@ import {
   CreditCard,
   MessageSquare,
   Bookmark,
+  AlertCircle,
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 import { NIGERIAN_BANKS } from "@/lib/banks-data"
 
 interface EnhancedNewBeneficiaryProps {
@@ -37,7 +39,14 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
   })
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [lookupComplete, setLookupComplete] = useState(false)
+  const [savedBeneficiaries, setSavedBeneficiaries] = useState<any[]>([])
   const { toast } = useToast()
+
+  // Load saved beneficiaries
+  useEffect(() => {
+    const beneficiaries = dataStore.getBeneficiaries()
+    setSavedBeneficiaries(beneficiaries)
+  }, [])
 
   // Auto lookup beneficiary name when account number changes
   useEffect(() => {
@@ -143,11 +152,12 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
         </div>
       </div>
 
-      {/* Enhanced Form */}
+      {/* Content based on active tab */}
+      {activeTab === "New Beneficiary" ? (
       <div className="px-4 py-6 space-y-6">
         {/* From Account with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <User className="h-4 w-4 text-[#004A9F]" />
             From account
           </label>
@@ -160,7 +170,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
                 <div className="text-sm font-bold text-gray-800">Savings account</div>
                 <div className="text-xs text-gray-600 font-medium">{dataStore.getUserData().name}</div>
                 <div className="text-xs text-gray-500">
-                  Balance: ₦{dataStore.getUserData().balance.toLocaleString()}
+                  Balance: ₦{formatCurrency(dataStore.getUserData().balance)}
                 </div>
               </div>
             </div>
@@ -170,7 +180,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
 
         {/* Bank Selection with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-[#004A9F]" />
             Bank
           </label>
@@ -201,7 +211,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
 
         {/* Account Number with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-[#004A9F]" />
             Account Number
           </label>
@@ -216,7 +226,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
 
         {/* Beneficiary Name with Enhanced Loading */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <User className="h-4 w-4 text-[#004A9F]" />
             Beneficiary Name
           </label>
@@ -250,22 +260,29 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
 
         {/* Amount with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-[#004A9F]" />
             Amount
           </label>
           <Input
-            placeholder="Enter amount"
-            type="number"
+            placeholder="Enter amount (e.g. 1000.00)"
+            type="text"
+            inputMode="decimal"
+            pattern="\d+(\.\d{2})?"
             value={formData.amount}
-            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, amount: e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1') })}
+            onBlur={() => {
+              if (!formData.amount) return
+              const n = Number(formData.amount)
+              setFormData((prev) => ({ ...prev, amount: Number(n.toFixed(2)).toFixed(2) }))
+            }}
             className="bg-white/90 backdrop-blur-sm border-2 border-gray-200/50 focus:border-[#004A9F] focus:ring-0 rounded-xl h-14 transition-all duration-200 hover:border-gray-300/70 text-lg font-semibold"
           />
         </div>
 
         {/* Remark with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-[#004A9F]" />
             Remark (optional)
           </label>
@@ -293,7 +310,52 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
             Save as beneficiary
           </label>
         </div>
-      </div>
+        </div>
+      ) : (
+        // Saved Beneficiaries Tab
+        <div className="px-4 py-6 pb-24">
+          {savedBeneficiaries.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-2">
+                <AlertCircle className="h-12 w-12 mx-auto opacity-50" />
+              </div>
+              <p className="text-gray-600 text-sm">No saved beneficiaries yet</p>
+              <p className="text-gray-500 text-xs mt-1">Add a beneficiary to see them here</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {savedBeneficiaries.map((beneficiary) => (
+                <Button
+                  key={beneficiary.id}
+                  variant="ghost"
+                  className="w-full h-auto p-4 justify-start bg-gradient-to-r from-white/90 to-blue-50/90 backdrop-blur-sm hover:from-blue-50/90 hover:to-blue-100/90 border border-white/50 hover:border-blue-200/50 rounded-2xl transition-all duration-300 shadow-md hover:shadow-lg"
+                  onClick={() => {
+                    const amount = formData.amount ? Number(formData.amount) : 0
+                    
+                    onContinue({
+                      accountNumber: beneficiary.accountNumber,
+                      bank: beneficiary.bank,
+                      beneficiaryName: beneficiary.name,
+                      amount,
+                      remark: formData.remark,
+                    })
+                  }}
+                >
+                  <div className="w-full text-left flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                      <User className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-gray-900">{beneficiary.name}</div>
+                      <div className="text-xs text-gray-600 mt-1">{beneficiary.bank}</div>
+                    </div>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Enhanced Continue Button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 shadow-2xl">

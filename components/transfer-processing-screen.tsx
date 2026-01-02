@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Loader2, CreditCard, Shield, CheckCircle, AlertCircle } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface TransferProcessingScreenProps {
   onNavigate: (screen: string, data?: any) => void
@@ -48,7 +49,7 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
                 section: "Today",
                 recipientBank: transferData.bank,
                 recipientAccount: transferData.accountNumber,
-                fee: 30,
+                fee: transferData.fee || 30,
               })
               .then((id) => {
                 console.log("[v0] Transaction added with ID:", id)
@@ -158,7 +159,7 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
             <div className="bg-white rounded-lg p-4 text-left">
               <div className="text-center mb-4">
                 <div className="text-2xl font-bold text-[#004A9F]">
-                  ₦ {Number.parseFloat(transferData?.amount || "0").toLocaleString()}
+                  ₦ {formatCurrency(Number.parseFloat(transferData?.amount || "0"))}
                 </div>
                 <div className="text-sm text-gray-600">to {transferData?.beneficiaryName || "Recipient"}</div>
               </div>

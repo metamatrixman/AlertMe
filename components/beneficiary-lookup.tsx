@@ -89,10 +89,10 @@ export function BeneficiaryLookup({
         <Input
           id="accountNumber"
           inputMode="numeric"
-          maxLength={18}
-          placeholder="Enter account number"
+          maxLength={10}
+          placeholder="Enter account number (10 digits)"
           value={accountNumber}
-          onChange={(e) => onAccountNumberChange(e.target.value.replace(/\D/g, ""))}
+          onChange={(e) => onAccountNumberChange(e.target.value.replace(/\D/g, "").slice(0,10))}
           className="bg-white pr-10 transition-all"
         />
         {isLoading && (

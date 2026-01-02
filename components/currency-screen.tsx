@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, ArrowUpDown, TrendingUp, TrendingDown, Globe, Home } from "lucide-react"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface CurrencyScreenProps {
   onBack: () => void
@@ -230,14 +231,14 @@ export function CurrencyScreen({ onBack, onNavigate }: CurrencyScreenProps) {
                     <div className="text-gray-600">Amount Sent</div>
                     <div className="font-medium">
                       {transaction.from === "NGN" ? "₦" : "$"}
-                      {transaction.amount.toLocaleString()}
+                      {formatCurrencyFn(transaction.amount)}
                     </div>
                   </div>
                   <div>
                     <div className="text-gray-600">Amount Received</div>
                     <div className="font-medium">
                       {transaction.to === "NGN" ? "₦" : "$"}
-                      {transaction.converted.toLocaleString()}
+                      {formatCurrencyFn(transaction.converted)}
                     </div>
                   </div>
                   <div>

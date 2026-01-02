@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Search, Filter, TrendingUp, TrendingDown, Clock } from "lucide-react"
 import { dataStore, type Transaction } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface EnhancedTransactionHistoryProps {
   onBack: () => void
@@ -174,7 +175,7 @@ export function EnhancedTransactionHistory({ onBack, onViewTransaction }: Enhanc
                   </div>
                   <div className="text-right">
                     <div className={`font-bold text-base ${transaction.isDebit ? "text-red-500" : "text-green-500"}`}>
-                      {transaction.isDebit ? "- " : "+ "}₦{transaction.amount.toLocaleString()}
+                      {transaction.isDebit ? "- " : "+ "}₦{formatCurrency(transaction.amount)}
                     </div>
                     <div
                       className={`text-xs font-semibold px-2 py-1 rounded-full ${
@@ -187,7 +188,7 @@ export function EnhancedTransactionHistory({ onBack, onViewTransaction }: Enhanc
                     >
                       {transaction.status}
                     </div>
-                    {transaction.fee && <div className="text-xs text-gray-500 mt-1">Fee: ₦{transaction.fee}</div>}
+                    {transaction.fee && <div className="text-xs text-gray-500 mt-1">Fee: ₦{formatCurrency(transaction.fee)}</div>}
                   </div>
                 </div>
               ))}

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ChevronDown, Home, Loader2, User, CreditCard, DollarSign, Receipt } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface EnhancedTransferScreenProps {
   onBack: () => void
@@ -38,6 +39,12 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
       // Simulate processing delay
       await new Promise((resolve) => setTimeout(resolve, 3000))
 
+      // Add transaction to store with fee information
+      const enrichedTransferData = {
+        ...transferData,
+        fee: transferFee,
+      }
+
       // Add transaction to store
       await dataStore.addTransaction({
         type: "Transfer to other bank",
@@ -54,6 +61,7 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
       })
 
       setIsTransferring(false)
+      // Pass enriched data with fee to next screen
       onContinue()
     } catch (err) {
       setIsTransferring(false)
@@ -79,7 +87,7 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
           </h2>
           <p className="text-gray-600 mb-4">Please wait while we process your transfer</p>
           <div className="text-lg font-semibold text-[#004A9F] mb-4">
-            ₦{Number.parseFloat(transferData?.amount || "0").toLocaleString()}
+            ₦{formatCurrency(Number.parseFloat(transferData?.amount || "0"))}
           </div>
           <div className="text-sm text-gray-500 mb-4">to {transferData?.beneficiaryName}</div>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
@@ -131,9 +139,9 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
       <div className="px-4 py-6 space-y-6">
         {/* From Account with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <User className="h-4 w-4 text-[#004A9F]" />
-            From account
+            From
           </label>
           <div className="bg-gradient-to-r from-white/90 to-gray-50/90 backdrop-blur-sm rounded-2xl p-5 flex items-center justify-between border border-white/50 shadow-md hover:shadow-lg transition-all duration-300">
             <div className="flex items-center gap-4">
@@ -143,7 +151,7 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
               <div>
                 <div className="text-sm font-bold text-gray-800">Savings account</div>
                 <div className="text-xs text-gray-600 font-medium">{userData.name}</div>
-                <div className="text-xs text-gray-500">Balance: ₦{userData.balance.toLocaleString()}</div>
+                <div className="text-xs text-gray-500">Balance: ₦{formatCurrency(userData.balance)}</div>
               </div>
             </div>
             <ChevronDown className="h-5 w-5 text-gray-400" />
@@ -152,9 +160,9 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
 
         {/* To Account with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <User className="h-4 w-4 text-[#004A9F]" />
-            To account
+            To
           </label>
           <div className="bg-gradient-to-r from-white/90 to-blue-50/90 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-md hover:shadow-lg transition-all duration-300">
             <div className="flex items-center gap-4">
@@ -164,7 +172,6 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
               <div>
                 <div className="text-sm font-bold text-gray-800">{transferData.beneficiaryName}</div>
                 <div className="text-xs text-gray-600 font-medium">{transferData.bank}</div>
-                <div className="text-xs text-gray-500">{transferData.accountNumber}</div>
               </div>
             </div>
           </div>
@@ -172,13 +179,13 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
 
         {/* Amount with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-[#004A9F]" />
             Amount
           </label>
           <div className="bg-gradient-to-r from-green-50/90 to-emerald-50/90 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-md">
             <div className="text-3xl font-bold text-green-600 mb-2">
-              ₦{Number.parseFloat(transferData.amount).toLocaleString()}
+              ₦{formatCurrency(Number.parseFloat(transferData.amount))}
             </div>
             {transferData.remark && (
               <div className="text-sm text-gray-600">
@@ -190,7 +197,7 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
 
         {/* Transaction Summary with Enhanced Design */}
         <div className="space-y-3">
-          <label className="text-sm font-bold text-gray-700 mb-2 block flex items-center gap-2">
+          <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
             <Receipt className="h-4 w-4 text-[#004A9F]" />
             Transaction Summary
           </label>
@@ -198,7 +205,7 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
             <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
               <span className="text-sm text-gray-600">Transfer Amount</span>
               <span className="font-semibold text-gray-800">
-                ₦{Number.parseFloat(transferData.amount).toLocaleString()}
+                ₦{formatCurrency(Number.parseFloat(transferData.amount))}
               </span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
@@ -208,7 +215,7 @@ export function EnhancedTransferScreen({ onBack, onContinue, transferData }: Enh
             <div className="flex justify-between items-center py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl px-3">
               <span className="text-sm font-bold text-gray-800">Total Amount</span>
               <span className="font-bold text-lg text-[#004A9F]">
-                ₦{(Number.parseFloat(transferData.amount) + transferFee).toLocaleString()}
+                ₦{formatCurrency(Number.parseFloat(transferData.amount) + transferFee)}
               </span>
             </div>
           </div>

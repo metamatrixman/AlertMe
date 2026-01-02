@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle, Share2, Download, Home, Copy, Sparkles, Receipt, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface EnhancedTransactionSuccessProps {
   onHome: () => void
@@ -92,7 +93,7 @@ export function EnhancedTransactionSuccess({ onHome, onViewReceipt, transferData
             {/* Amount Section */}
             <div className="text-center py-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200/50">
               <div className="text-4xl font-bold text-green-600 mb-2">
-                ₦{transferData ? Number.parseFloat(transferData.amount).toLocaleString() : "50,000"}
+                ₦{transferData ? formatCurrency(Number.parseFloat(transferData.amount)) : "50,000.00"}
               </div>
               <div className="text-sm text-gray-600 font-medium">Amount Transferred</div>
             </div>

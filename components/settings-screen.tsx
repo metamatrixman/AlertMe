@@ -27,6 +27,7 @@ import {
   Archive,
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface SettingsScreenProps {
   onNavigate: (screen: string) => void
@@ -41,11 +42,13 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
   const [showStorageModal, setShowStorageModal] = useState(false)
   const [storageContent, setStorageContent] = useState<string>("")
   const [storageStats, setStorageStats] = useState(() => dataStore.getStorageStats())
+  const [userData, setUserData] = useState(dataStore.getUserData())
 
   // Subscribe to dataStore changes so UI updates when storage is cleared/modified
   useEffect(() => {
     const unsubscribe = dataStore.subscribe(() => {
       setStorageStats(dataStore.getStorageStats())
+      setUserData(dataStore.getUserData())
       // update preview if modal open
       if (showStorageModal) setStorageContent(dataStore.exportData())
     })
@@ -53,11 +56,11 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showStorageModal])
 
-  // Mock user statistics
+  // Dynamic user statistics based on actual data
   const userStats = {
-    balance: "₦ 150,000.20",
-    beneficiaries: 12,
-    recentTransactions: 8,
+    balance: `₦ ${formatCurrency(userData.balance)}`,
+    beneficiaries: dataStore.getBeneficiaries().length,
+    recentTransactions: dataStore.getTransactions().slice(0, 10).length,
   }
 
   const quickActions = [

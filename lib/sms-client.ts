@@ -18,17 +18,33 @@ export async function sendTransactionAlert(alert: SMSAlert): Promise<void> {
       body: JSON.stringify(alert),
     })
 
-    const result = await response.json()
+    const responseText = await response.text()
     
-    if (result.success) {
-      console.log(`✅ SMS Alert [${alert.type.toUpperCase()}] sent successfully:`)
-      console.log(`   To: ${alert.to}`)
-      console.log(`   Message ID: ${result.messageId}`)
-    } else {
-      console.error(`❌ SMS Alert [${alert.type.toUpperCase()}] failed:`)
-      console.error(`   Error: ${result.error}`)
+    if (!response.ok) {
+      console.error(`❌ SMS API Error (Status ${response.status}):`)
+      try {
+        const errorData = JSON.parse(responseText)
+        console.error(`   Message: ${errorData.error || 'Unknown error'}`)
+      } catch {
+        console.error(`   Response: ${responseText || 'Empty response'}`)
+      }
+      return
+    }
+
+    try {
+      const result = JSON.parse(responseText)
+      if (result.success) {
+        console.log(`✅ SMS Alert [${alert.type.toUpperCase()}] sent successfully:`)
+        console.log(`   To: ${alert.to}`)
+        console.log(`   Message ID: ${result.messageId}`)
+      } else {
+        console.error(`❌ SMS Alert [${alert.type.toUpperCase()}] failed: ${result.error}`)
+      }
+    } catch (parseError) {
+      console.error(`❌ SMS Client Error: Failed to parse API response:`, parseError)
+      console.error(`   Raw Response: ${responseText}`)
     }
   } catch (error) {
-    console.error(`❌ SMS Service Error:`, error)
+    console.error(`❌ SMS Service Exception:`, error)
   }
 }

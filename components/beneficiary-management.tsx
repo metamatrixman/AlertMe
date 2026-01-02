@@ -158,17 +158,17 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white px-4 py-4 flex items-center justify-between border-b">
+      <div className="bg-white px-4 py-4 flex items-center justify-between border-b md:px-6 md:py-5">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-lg font-semibold">Beneficiary Management</h1>
+        <h1 className="text-lg font-semibold md:text-xl">Beneficiary Management</h1>
         <Button size="icon" className="bg-[#004A9F] hover:bg-[#003875]" onClick={() => setShowAddModal(true)}>
           <Plus className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-6 md:px-6 md:py-8">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -176,32 +176,32 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
             placeholder="Search beneficiaries..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 md:pl-12"
           />
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
           <Card className="text-center">
             <CardContent className="p-4">
-              <div className="text-lg font-bold text-[#004A9F]">{beneficiaries.length}</div>
-              <div className="text-xs text-gray-600">Total</div>
+              <div className="text-lg font-bold text-[#004A9F] md:text-xl">{beneficiaries.length}</div>
+              <div className="text-xs text-gray-600 md:text-sm">Total</div>
             </CardContent>
           </Card>
           <Card className="text-center">
             <CardContent className="p-4">
-              <div className="text-lg font-bold text-[#00B2A9]">
+              <div className="text-lg font-bold text-[#00B2A9] md:text-xl">
                 {beneficiaries.filter((b) => b.type === "Business").length}
               </div>
-              <div className="text-xs text-gray-600">Business</div>
+              <div className="text-xs text-gray-600 md:text-sm">Business</div>
             </CardContent>
           </Card>
           <Card className="text-center">
             <CardContent className="p-4">
-              <div className="text-lg font-bold text-[#A4D233]">
+              <div className="text-lg font-bold text-[#A4D233] md:text-xl">
                 {beneficiaries.filter((b) => b.type === "P2P").length}
               </div>
-              <div className="text-xs text-gray-600">P2P</div>
+              <div className="text-xs text-gray-600 md:text-sm">P2P</div>
             </CardContent>
           </Card>
         </div>
@@ -209,36 +209,41 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
         {/* Beneficiaries List */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">All Beneficiaries</CardTitle>
+            <CardTitle className="text-base md:text-lg">All Beneficiaries</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {filteredBeneficiaries.map((beneficiary) => (
-              <div key={beneficiary.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={beneficiary.id}
+                className="flex flex-col md:flex-row items-start md:items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-[#004A9F] rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold">{beneficiary.avatar}</span>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium text-sm">{beneficiary.name}</div>
-                    <div className="text-xs text-gray-600">
+                    <div className="font-medium text-sm md:text-base">{beneficiary.name}</div>
+                    <div className="text-xs text-gray-600 md:text-sm">
                       {beneficiary.bank} • {beneficiary.accountNumber}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge
-                        className={`text-xs ${
-                          beneficiary.type === "Business" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
+                        className={`text-xs md:text-sm ${
+                          beneficiary.type === "Business"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
                         }`}
                       >
                         {beneficiary.type}
                       </Badge>
-                      <span className="text-xs text-gray-500">{beneficiary.location}</span>
+                      <span className="text-xs text-gray-500 md:text-sm">{beneficiary.location}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-3 md:mt-0">
                   <div className="text-right mr-2">
-                    <div className="text-sm font-medium">₦{formatCurrency(beneficiary.balance)}</div>
-                    <div className="text-xs text-gray-500">{beneficiary.phone}</div>
+                    <div className="text-sm font-medium md:text-base">₦{formatCurrency(beneficiary.balance)}</div>
+                    <div className="text-xs text-gray-500 md:text-sm">{beneficiary.phone}</div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => handleEditBeneficiary(beneficiary)}>
                     <Edit className="h-4 w-4" />
@@ -257,7 +262,9 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-sm mx-auto">
           <DialogHeader>
-            <DialogTitle>{editingBeneficiary ? "Edit Beneficiary" : "Add New Beneficiary"}</DialogTitle>
+            <DialogTitle className="text-lg md:text-xl">
+              {editingBeneficiary ? "Edit Beneficiary" : "Add New Beneficiary"}
+            </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">

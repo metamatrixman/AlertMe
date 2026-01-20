@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, Crown, Star, Zap, Shield, Globe, CheckCircle, Home } from "lucide-react"
+import { ArrowLeft, Crown, Star, Zap, Shield, Globe, CheckCircle, Home } from "@/components/ui/iconify-compat"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/form-utils"
 

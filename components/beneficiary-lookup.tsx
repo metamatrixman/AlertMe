@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, AlertCircle, Check } from "lucide-react"
+import { Loader2, AlertCircle, Check } from "@/components/ui/iconify-compat"
 import { dataStore } from "@/lib/data-store"
 
 interface BeneficiaryLookupProps {

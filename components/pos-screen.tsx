@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Smartphone, MapPin, Clock, CreditCard, QrCode, Home } from "lucide-react"
+import { ArrowLeft, Smartphone, MapPin, Clock, CreditCard, QrCode, Home } from "@/components/ui/iconify-compat"
 
 interface POSScreenProps {
   onBack: () => void

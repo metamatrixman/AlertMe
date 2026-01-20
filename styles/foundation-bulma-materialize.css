@@ -1,0 +1,20 @@
+/* Custom overrides */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Utility classes */
+.heroicons-primary {
+  color: #1E40AF;
+}
+.heroicons-secondary {
+  color: #9333EA;
+}
+
+/* Animation classes */
+.anime-fade-in {
+  animation: anime-fade-in 0.5s ease-in-out;
+}
+.anime-slide-up {
+  animation: anime-slide-up 0.5s ease-in-out;
+}

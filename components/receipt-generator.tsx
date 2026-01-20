@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ArrowLeft, Plus, Download, Share2, Eye, Trash2 } from "lucide-react"
+import { ArrowLeft, Plus, Download, Share2, Eye, Trash2 } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
 
 interface Receipt {

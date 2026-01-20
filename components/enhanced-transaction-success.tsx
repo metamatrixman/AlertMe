@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle, Share2, Download, Home, Copy, Sparkles, Receipt, Clock } from "lucide-react"
+import { CheckCircle, Share2, Download, Home, Copy, Sparkles, Receipt, Clock } from "@/components/ui/iconify-compat"
 import { useToast } from "@/hooks/use-toast"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"

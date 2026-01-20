@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ArrowLeft, Plus, Edit, Trash2, Search } from "lucide-react"
+import { ArrowLeft, Plus, Edit, Trash2, Search } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
 
 interface Beneficiary {

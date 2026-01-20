@@ -26,7 +26,7 @@ import {
   Building2,
   Wallet,
   Star,
-} from "lucide-react"
+} from "@/components/ui/iconify-compat"
 import { NIGERIAN_BANKS } from "@/lib/banks-data"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"

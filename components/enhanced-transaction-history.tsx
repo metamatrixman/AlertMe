@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Search, Filter, TrendingUp, TrendingDown, Clock } from "lucide-react"
+import { ArrowLeft, Search, Filter, TrendingUp, TrendingDown, Clock } from "@/components/ui/iconify-compat"
 import { dataStore, type Transaction } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 

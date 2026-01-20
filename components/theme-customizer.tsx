@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Palette, Check } from "lucide-react"
+import { ArrowLeft, Palette, Check } from "@/components/ui/iconify-compat"
 import { hexToHsl } from "@/lib/theme-utils"
 
 interface ThemeCustomizerProps {

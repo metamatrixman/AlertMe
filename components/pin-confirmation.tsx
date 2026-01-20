@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { memo } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, ChevronDown, Delete } from "lucide-react"
+import { ArrowLeft, ChevronDown, Delete } from "@/components/ui/iconify-compat"
 
 interface PinConfirmationProps {
   onBack: () => void

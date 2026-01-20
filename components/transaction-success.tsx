@@ -2,7 +2,7 @@
 
 import { memo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Check, Share } from "lucide-react"
+import { ArrowLeft, Check, Share } from "@/components/ui/iconify-compat"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 

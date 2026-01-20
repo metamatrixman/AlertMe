@@ -3,11 +3,9 @@ import type { Config } from "tailwindcss"
 const config: Config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-    "*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   prefix: "",
   theme: {
@@ -60,6 +58,10 @@ const config: Config = {
           green: "#A4D233",
           lime: "#8BC220",
         },
+        heroicons: {
+          primary: "#1E40AF",
+          secondary: "#9333EA",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -107,6 +109,14 @@ const config: Config = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-4px)" },
         },
+        "anime-fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "anime-slide-up": {
+          from: { transform: "translateY(100%)" },
+          to: { transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -119,6 +129,8 @@ const config: Config = {
         "pulse-gentle": "pulse-gentle 2s ease-in-out infinite",
         "spin-slow": "spin-slow 3s linear infinite",
         "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
+        "anime-fade-in": "anime-fade-in 0.5s ease-in-out",
+        "anime-slide-up": "anime-slide-up 0.5s ease-in-out",
       },
       spacing: {
         "safe-top": "env(safe-area-inset-top)",

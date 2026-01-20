@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Search, Send, X } from "lucide-react"
+import { Search, Send, X } from "@/components/ui/iconify-compat"
 
 interface NetworkChatModalProps {
   isOpen: boolean

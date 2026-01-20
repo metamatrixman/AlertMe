@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent } from "@/components/ui/card"
-import { MessageCircle, MessageSquare, Send } from "lucide-react"
+import { MessageCircle, MessageSquare, Send } from "@/components/ui/iconify-compat"
 
 interface ShareDetailsModalProps {
   isOpen: boolean

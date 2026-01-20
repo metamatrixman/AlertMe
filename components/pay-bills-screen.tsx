@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Zap, Wifi, Tv, Phone, Car, Home, Receipt } from "lucide-react"
+import { ArrowLeft, Zap, Wifi, Tv, Phone, Car, Home, Receipt } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
 
 interface PayBillsScreenProps {

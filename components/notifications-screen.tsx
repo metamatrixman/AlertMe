@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Bell, Check, Trash2 } from "lucide-react"
+import { ArrowLeft, Bell, Check, Trash2 } from "@/components/ui/iconify-compat"
 import { dataStore, type Notification } from "@/lib/data-store"
 
 interface NotificationsScreenProps {

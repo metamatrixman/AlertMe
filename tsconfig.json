@@ -18,8 +18,12 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "lucide-react": ["components/ui/iconify-compat.tsx"],
+      "@heroicons/react/solid": ["components/ui/iconify-compat.tsx"],
+      "@heroicons/react/outline": ["components/ui/iconify-compat.tsx"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

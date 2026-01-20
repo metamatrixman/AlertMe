@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, CreditCard, Plus, Eye, EyeOff, Copy, Settings, Trash2, Lock, Unlock, Home } from "lucide-react"
+import { ArrowLeft, CreditCard, Plus, Eye, EyeOff, Copy, Settings, Trash2, Lock, Unlock, Home } from "@/components/ui/iconify-compat"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/form-utils"
 

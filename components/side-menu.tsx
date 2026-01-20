@@ -15,7 +15,7 @@ import {
   MoreHorizontal,
   User,
   Settings,
-} from "lucide-react"
+} from "@/components/ui/iconify-compat"
 
 interface SideMenuProps {
   isOpen: boolean

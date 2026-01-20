@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, ChevronDown, Home, Loader2, User, CreditCard, DollarSign, Receipt } from "lucide-react"
+import { ArrowLeft, ChevronDown, Home, Loader2, User, CreditCard, DollarSign, Receipt } from "@/components/ui/iconify-compat"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 

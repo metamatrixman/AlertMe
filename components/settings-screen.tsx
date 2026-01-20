@@ -25,7 +25,7 @@ import {
   HelpCircle,
   FileText,
   Archive,
-} from "lucide-react"
+} from "@/components/ui/iconify-compat"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 

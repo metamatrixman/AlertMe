@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Camera, Edit, Save, X } from "lucide-react"
+import { ArrowLeft, Camera, Edit, Save, X } from "@/components/ui/iconify-compat"
 import { dataStore, type UserData } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 

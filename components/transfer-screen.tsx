@@ -2,7 +2,7 @@
 
 import { memo } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, ChevronDown, Home } from "lucide-react"
+import { ArrowLeft, ChevronDown, Home } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
 
 interface TransferScreenProps {

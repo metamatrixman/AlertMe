@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Home, Plus, FileText, ClipboardList } from "lucide-react"
+import { ArrowLeft, Home, Plus, FileText, ClipboardList } from "@/components/ui/iconify-compat"
 import { dataStore, type LoanApplication } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 

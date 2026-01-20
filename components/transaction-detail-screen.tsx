@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Share2, Download, Copy, Check } from "lucide-react"
+import { ArrowLeft, Share2, Download, Copy, Check } from "@/components/ui/iconify-compat"
 import { useState } from "react"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, ArrowLeftRight, Building2, Globe, CreditCard, Smartphone, Calendar, Send } from "lucide-react"
+import { ArrowLeft, ArrowLeftRight, Building2, Globe, CreditCard, Smartphone, Calendar, Send } from "@/components/ui/iconify-compat"
 
 interface TransferOptionsProps {
   onBack: () => void

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ArrowLeft, Search, Filter } from "lucide-react"
+import { ArrowLeft, Search, Filter } from "@/components/ui/iconify-compat"
 
 interface TransactionHistoryProps {
   onBack: () => void

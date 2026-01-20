@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, CheckCircle2, Clock, AlertCircle, Home } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Clock, AlertCircle, Home } from "@/components/ui/iconify-compat"
 import { Progress } from "@/components/ui/progress"
 
 interface LoanRequirementsChecklistProps {

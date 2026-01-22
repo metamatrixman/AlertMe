@@ -277,9 +277,9 @@ export function Dashboard({ onNavigate, onMenuToggle }: DashboardProps) {
             <CreditCardIcon className="h-6 w-6 text-gray-400 mx-auto" />
             <span className="text-xs text-gray-400">Cards</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95">
+          <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => onNavigate("beneficiary-management")}>
             <UserIcon className="h-6 w-6 text-gray-400 mx-auto" />
-            <span className="text-xs text-gray-400">Profile</span>
+            <span className="text-xs text-gray-400">Beneficiaries</span>
           </button>
           <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => onNavigate("settings")}>
             <CogIcon className="h-6 w-6 text-gray-400 mx-auto" />

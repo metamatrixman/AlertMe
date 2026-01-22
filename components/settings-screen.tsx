@@ -290,8 +290,8 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
       <BankServiceStatus isOpen={showServiceStatus} onClose={() => setShowServiceStatus(false)} />
       <AddFundsModal isOpen={showAddFunds} onClose={() => setShowAddFunds(false)} />
       {showStorageModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-start justify-center p-4">
-          <div className="max-w-3xl w-full mt-12 bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4">
+          <div className="max-w-3xl w-full mt-12 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <div className="flex items-center gap-3">
                 <Archive className="h-5 w-5 text-[#004A9F]" />

@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { NIGERIAN_BANKS } from "@/lib/banks-data"
 
 interface BankServiceStatusProps {
   isOpen: boolean
@@ -18,18 +19,18 @@ interface ServiceStatus {
 }
 
 export function BankServiceStatus({ isOpen, onClose }: BankServiceStatusProps) {
-  const services: ServiceStatus[] = [
-    { name: "Ecobank", type: "bank", status: "operational", uptime: 99.9, logo: "E" },
-    { name: "GTBank", type: "bank", status: "operational", uptime: 98.5, logo: "G" },
-    { name: "Access Bank", type: "bank", status: "degraded", uptime: 95.2, logo: "A" },
-    { name: "First Bank", type: "bank", status: "operational", uptime: 97.8, logo: "F" },
-    { name: "Zenith Bank", type: "bank", status: "down", uptime: 85.0, logo: "Z" },
-    { name: "UBA", type: "bank", status: "operational", uptime: 96.7, logo: "U" },
-    { name: "Opay", type: "wallet", status: "operational", uptime: 99.1, logo: "O" },
-    { name: "PalmPay", type: "wallet", status: "operational", uptime: 98.9, logo: "P" },
-    { name: "Kuda", type: "wallet", status: "degraded", uptime: 94.5, logo: "K" },
-    { name: "Moniepoint", type: "wallet", status: "operational", uptime: 97.2, logo: "M" },
-  ]
+  // Generate service status for all banks and wallets
+  const generateServiceStatus = (): ServiceStatus[] => {
+    return NIGERIAN_BANKS.map((bank) => ({
+      name: bank.name,
+      type: bank.type,
+      status: Math.random() > 0.8 ? (Math.random() > 0.5 ? "degraded" : "down") : "operational",
+      uptime: Math.random() * 15 + 85, // Random uptime between 85-100%
+      logo: bank.name.charAt(0),
+    }))
+  }
+
+  const services = generateServiceStatus()
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -81,7 +82,7 @@ export function BankServiceStatus({ isOpen, onClose }: BankServiceStatusProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               {banks.map((service) => (
-                <div key={service.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={service.name + service.type} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <div className="w-8 h-8 bg-[#004A9F] rounded-full flex items-center justify-center">
@@ -121,7 +122,7 @@ export function BankServiceStatus({ isOpen, onClose }: BankServiceStatusProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               {wallets.map((service) => (
-                <div key={service.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={service.name + service.type} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <div className="w-8 h-8 bg-[#00B2A9] rounded-full flex items-center justify-center">

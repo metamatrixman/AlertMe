@@ -12,11 +12,11 @@ import {
   ArrowUpFromLine,
   Copy,
   MoreHorizontal,
-  Home,
-  Mail,
-  CreditCard,
-  User,
-  Settings,
+  HomeIcon,
+  InboxIcon,
+  CreditCardIcon,
+  UserIcon,
+  CogIcon,
   Smartphone,
   Globe,
   ChevronDown,
@@ -211,8 +211,8 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
             <h4 className="text-sm font-semibold mb-3 text-gray-900">Additional Services</h4>
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: "Loans", icon: CreditCard, action: "loans" },
-                { label: "Cards", icon: CreditCard, action: "virtual-cards" },
+                { label: "Loans", icon: CreditCardIcon, action: "loans" },
+                { label: "Cards", icon: CreditCardIcon, action: "virtual-cards" },
                 { label: "POS", icon: Smartphone, action: "pos" },
                 { label: "Currency", icon: Globe, action: "currency" },
               ].map((item) => (
@@ -314,36 +314,44 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 card-shadow safe-area-inset-bottom">
-        <div className="flex justify-around max-w-screen-sm mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg safe-area-inset-bottom">
+        <div className="flex justify-around items-center max-w-screen-sm mx-auto">
           {[
-            { label: "Home", icon: Home, color: "[#004A9F]" },
-            { label: "Inbox", icon: Mail, action: "notifications", notification: unreadCount },
-            { label: "Cards", icon: CreditCard, action: "virtual-cards" },
-            { label: "Profile", icon: User, action: "profile" },
-            { label: "Settings", icon: Settings, action: "settings" },
+            { label: "Home", icon: HomeIcon, color: "#004A9F", isActive: true },
+            { label: "Inbox", icon: InboxIcon, action: "notifications", notification: unreadCount, color: "#004A9F" },
+            { label: "Cards", icon: CreditCardIcon, action: "virtual-cards", color: "#004A9F" },
+            { label: "Profile", icon: UserIcon, action: "profile", color: "#004A9F" },
+            { label: "Settings", icon: CogIcon, action: "settings", color: "#004A9F" },
           ].map((item) => (
-            <div
+            <button
               key={item.label}
-              className="text-center flex-1 cursor-pointer touch-target"
+              className="flex flex-col items-center justify-center gap-1 flex-1 cursor-pointer touch-target transition-all duration-200 hover:scale-105 active:scale-95"
               onClick={() => item.action && onNavigate(item.action)}
             >
-              <div className="relative inline-block">
+              <div className="relative">
                 {item.icon && (
                   <item.icon
-                    className={`h-6 w-6 ${item.label === "Home" ? `text-[${item.color}]` : "text-gray-400"} mx-auto mb-1`}
+                    className={`h-6 w-6 transition-colors duration-200 ${
+                      item.isActive ? `text-[${item.color}]` : "text-gray-400"
+                    }`}
+                    style={item.isActive ? { color: item.color } : undefined}
                   />
                 )}
                 {item.notification && item.notification > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px] shadow-md">
                     {item.notification > 9 ? "9+" : item.notification}
                   </span>
                 )}
               </div>
-              <span className={`text-xs font-medium ${item.label === "Home" ? "text-[#004A9F]" : "text-gray-400"}`}>
+              <span
+                className={`text-xs font-medium transition-colors duration-200 ${
+                  item.isActive ? "text-[#004A9F]" : "text-gray-400"
+                }`}
+                style={item.isActive ? { color: item.color } : undefined}
+              >
                 {item.label}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       </div>

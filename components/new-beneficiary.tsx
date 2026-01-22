@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,6 +37,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
   const [formError, setFormError] = useState("")
   const [savedBeneficiaries, setSavedBeneficiaries] = useState<any[]>([])
   const { toast } = useToast()
+  const amountInputRef = useRef<HTMLInputElement>(null)
 
   // Load saved beneficiaries
   useEffect(() => {
@@ -58,7 +59,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
       accountNumber: "",
       bank: "",
       beneficiaryName: "",
-      amount: 0, // FIXED: Default amount is now number 0
+      amount: "" as any, // Initialize as empty string for blank placeholder display
       remark: "",
       saveAsBeneficiary: true,
     },
@@ -68,6 +69,23 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
   const { isSubmitting } = formState
 
   const accountNumber = watch("accountNumber")
+
+  // Handler for selecting a saved beneficiary - populates form and focuses amount field
+  const handleSelectBeneficiary = (beneficiary: any) => {
+    // Populate form fields with beneficiary data
+    setValue("bank", beneficiary.bank)
+    setValue("accountNumber", beneficiary.accountNumber)
+    setValue("beneficiaryName", beneficiary.name)
+    clearErrors(["bank", "accountNumber", "beneficiaryName"] as any)
+    
+    // Switch to New Beneficiary tab to show the populated form
+    setActiveTab("New Beneficiary")
+    
+    // Focus on amount input field after a short delay to allow tab switch
+    setTimeout(() => {
+      amountInputRef.current?.focus()
+    }, 100)
+  }
 
   const handleBeneficiaryFound = (info: { name: string; bank?: string; accountNumber?: string }) => {
     if (info.name) setValue("beneficiaryName", info.name)
@@ -223,20 +241,31 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
             {/* Amount */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Amount</label>
-              <Input
-                placeholder="Enter amount (e.g. 1000.00)"
-                inputMode="numeric"
-                step="0.01"
-                pattern="^\d+(\.\d{1,2})?$"
-                {...methods.register("amount")}
-                className="bg-white"
-                onBlur={(e) => {
-                  const v = e.currentTarget.value
-                  if (!v) return
-                  const n = Number(v)
-                  methods.setValue("amount", Number(n.toFixed(2)))
-                }}
-              />
+              {(() => {
+                const { ref: registerRef, ...amountRegister } = methods.register("amount")
+                return (
+                  <Input
+                    placeholder="Enter amount (e.g. 1000.00)"
+                    inputMode="numeric"
+                    step="0.01"
+                    pattern="^\d+(\.\d{1,2})?$"
+                    {...amountRegister}
+                    ref={(el: HTMLInputElement | null) => {
+                      // Store in our ref for programmatic focus
+                      amountInputRef.current = el
+                      // Also call react-hook-form's ref
+                      if (typeof registerRef === 'function') registerRef(el)
+                    }}
+                    className="bg-white"
+                    onBlur={(e) => {
+                      const v = e.currentTarget.value
+                      if (!v) return
+                      const n = Number(v)
+                      methods.setValue("amount", Number(n.toFixed(2)))
+                    }}
+                  />
+                )
+              })()}
               <FormError name="amount" />
             </div>
 
@@ -292,18 +321,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
                   key={beneficiary.id}
                   variant="ghost"
                   className="w-full h-auto p-4 justify-start bg-white hover:bg-gray-50 border border-gray-200 rounded-lg"
-                  onClick={() => {
-                    const amount = methods.getValues("amount") || ""
-                    const remark = methods.getValues("remark") || ""
-                    
-                    onNavigate("transfer", {
-                      accountNumber: beneficiary.accountNumber,
-                      bank: beneficiary.bank,
-                      beneficiaryName: beneficiary.name,
-                      amount: amount ? Number(amount) : 0,
-                      remark: remark,
-                    })
-                  }}
+                  onClick={() => handleSelectBeneficiary(beneficiary)}
                 >
                   <div className="w-full text-left">
                     <div className="font-medium text-sm text-gray-900">{beneficiary.name}</div>

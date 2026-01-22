@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -15,12 +15,23 @@ import {
   Building2,
   CreditCard,
   MessageSquare,
-  Bookmark,
+  Star,
   AlertCircle,
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 import { NIGERIAN_BANKS } from "@/lib/banks-data"
+
+// Special wallets that use phone number as account number
+const PHONE_BASED_WALLETS = [
+  "Opay",
+  "PalmPay",
+  "Paga",
+  "Kuda Bank",
+  "Fairmoney",
+  "NowNow Digital Systems",
+  "MoMo PSB (MTN)"
+]
 
 interface EnhancedNewBeneficiaryProps {
   onBack: () => void
@@ -33,6 +44,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
     bank: "",
     accountNumber: "",
     beneficiaryName: "",
+    beneficiaryTelephone: "",
     amount: "",
     remark: "",
     saveAsBeneficiary: true,
@@ -41,12 +53,34 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
   const [lookupComplete, setLookupComplete] = useState(false)
   const [savedBeneficiaries, setSavedBeneficiaries] = useState<any[]>([])
   const { toast } = useToast()
+  const amountInputRef = useRef<HTMLInputElement>(null)
 
   // Load saved beneficiaries
   useEffect(() => {
     const beneficiaries = dataStore.getBeneficiaries()
     setSavedBeneficiaries(beneficiaries)
   }, [])
+
+  // Handler for selecting a saved beneficiary - populates form and focuses amount field
+  const handleSelectBeneficiary = (beneficiary: any) => {
+    // Populate form fields with beneficiary data
+    setFormData((prev) => ({
+      ...prev,
+      bank: beneficiary.bank,
+      accountNumber: beneficiary.accountNumber,
+      beneficiaryName: beneficiary.name,
+      beneficiaryTelephone: beneficiary.phone || "",
+    }))
+    setLookupComplete(true)
+    
+    // Switch to New Beneficiary tab to show the populated form
+    setActiveTab("New Beneficiary")
+    
+    // Focus on amount input field after a short delay to allow tab switch and state update
+    setTimeout(() => {
+      amountInputRef.current?.focus()
+    }, 100)
+  }
 
   // Auto lookup beneficiary name when account number changes
   useEffect(() => {
@@ -59,16 +93,23 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
         const beneficiary = dataStore.findBeneficiaryByAccount(formData.accountNumber)
 
         if (beneficiary) {
-          setFormData((prev) => ({ ...prev, beneficiaryName: beneficiary.name }))
-          setLookupComplete(true)
-        } else {
-          toast({
-            title: "Unable to fetch name",
-            description: "Unable to fetch name provide account name",
-            variant: "destructive",
-          })
-          setFormData((prev) => ({ ...prev, beneficiaryName: "" }))
-        }
+           setFormData((prev) => ({ ...prev, beneficiaryName: beneficiary.name, beneficiaryTelephone: beneficiary.phone || "" }))
+           setLookupComplete(true)
+         } else {
+           toast({
+             title: "Unable to fetch name",
+             description: "Unable to fetch name provide account name",
+             variant: "destructive",
+           })
+           setFormData((prev) => {
+             const isPhoneBased = PHONE_BASED_WALLETS.includes(prev.bank)
+             return {
+               ...prev,
+               beneficiaryName: "",
+               beneficiaryTelephone: isPhoneBased ? "+2340" + prev.accountNumber : ""
+             }
+           })
+         }
 
         setIsLookingUp(false)
       }, 5000)
@@ -80,6 +121,13 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
       setLookupComplete(false)
     }
   }, [formData.accountNumber, toast])
+
+  // Clear beneficiary telephone when bank changes to non-phone based
+  useEffect(() => {
+    if (!PHONE_BASED_WALLETS.includes(formData.bank)) {
+      setFormData((prev) => ({ ...prev, beneficiaryTelephone: "" }))
+    }
+  }, [formData.bank])
 
   const handleContinue = () => {
     if (!formData.bank || !formData.accountNumber || !formData.amount) {
@@ -95,6 +143,15 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
       toast({
         title: "Beneficiary Name Required",
         description: "Please provide the beneficiary name",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (PHONE_BASED_WALLETS.includes(formData.bank) && !formData.beneficiaryTelephone) {
+      toast({
+        title: "Beneficiary Telephone Required",
+        description: "Please provide the beneficiary telephone number for SMS alert",
         variant: "destructive",
       })
       return
@@ -258,6 +315,22 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
           </div>
         </div>
 
+        {/* Beneficiary Telephone for Phone-based Wallets */}
+        {PHONE_BASED_WALLETS.includes(formData.bank) && (
+          <div className="space-y-3">
+            <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-[#004A9F]" />
+              Beneficiary Telephone (for SMS alert)
+            </label>
+            <Input
+              placeholder="Enter beneficiary telephone number"
+              value={formData.beneficiaryTelephone}
+              onChange={(e) => setFormData({ ...formData, beneficiaryTelephone: e.target.value })}
+              className="bg-white/90 backdrop-blur-sm border-2 border-gray-200/50 focus:border-[#004A9F] focus:ring-0 rounded-xl h-14 transition-all duration-200 hover:border-gray-300/70"
+            />
+          </div>
+        )}
+
         {/* Amount with Enhanced Design */}
         <div className="space-y-3">
           <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
@@ -265,6 +338,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
             Amount
           </label>
           <Input
+            ref={amountInputRef}
             placeholder="Enter amount (e.g. 1000.00)"
             type="text"
             inputMode="decimal"
@@ -306,7 +380,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
             htmlFor="save-beneficiary"
             className="text-sm font-semibold text-gray-700 flex items-center gap-2 cursor-pointer"
           >
-            <Bookmark className="h-4 w-4 text-[#004A9F]" />
+            <Star className="h-4 w-4 text-[#004A9F]" />
             Save as beneficiary
           </label>
         </div>
@@ -329,17 +403,7 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
                   key={beneficiary.id}
                   variant="ghost"
                   className="w-full h-auto p-4 justify-start bg-gradient-to-r from-white/90 to-blue-50/90 backdrop-blur-sm hover:from-blue-50/90 hover:to-blue-100/90 border border-white/50 hover:border-blue-200/50 rounded-2xl transition-all duration-300 shadow-md hover:shadow-lg"
-                  onClick={() => {
-                    const amount = formData.amount ? Number(formData.amount) : 0
-                    
-                    onContinue({
-                      accountNumber: beneficiary.accountNumber,
-                      bank: beneficiary.bank,
-                      beneficiaryName: beneficiary.name,
-                      amount,
-                      remark: formData.remark,
-                    })
-                  }}
+                  onClick={() => handleSelectBeneficiary(beneficiary)}
                 >
                   <div className="w-full text-left flex items-start gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">

@@ -11,15 +11,15 @@ import {
   ArrowUpFromLine,
   Copy,
   MoreHorizontal,
-  Home,
-  Mail,
-  CreditCard,
-  User,
-  Settings,
+  HomeIcon,
+  InboxIcon,
+  CreditCardIcon,
+  UserIcon,
+  CogIcon,
   Receipt,
   Smartphone,
   Globe,
-} from "lucide-react"
+} from "@/components/ui/iconify-compat"
 
 interface DashboardProps {
   onNavigate: (screen: string) => void
@@ -163,7 +163,7 @@ export function Dashboard({ onNavigate, onMenuToggle }: DashboardProps) {
                   className="w-12 h-12 rounded-full mb-2 border-[#004A9F] text-[#004A9F] bg-transparent"
                   onClick={() => onNavigate("loans")}
                 >
-                  <CreditCard className="h-5 w-5" />
+                  <CreditCardIcon className="h-5 w-5" />
                 </Button>
                 <span className="text-xs">Loans</span>
               </div>
@@ -263,28 +263,28 @@ export function Dashboard({ onNavigate, onMenuToggle }: DashboardProps) {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2">
-        <div className="flex justify-around">
-          <div className="text-center">
-            <Home className="h-6 w-6 text-[#004A9F] mx-auto mb-1" />
-            <span className="text-xs text-[#004A9F] font-medium">Home</span>
-          </div>
-          <div className="text-center">
-            <Mail className="h-6 w-6 text-gray-400 mx-auto mb-1" />
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+        <div className="flex justify-around items-center">
+          <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95">
+            <HomeIcon className="h-6 w-6 mx-auto" style={{ color: "#004A9F" }} />
+            <span className="text-xs font-medium" style={{ color: "#004A9F" }}>Home</span>
+          </button>
+          <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95">
+            <InboxIcon className="h-6 w-6 text-gray-400 mx-auto" />
             <span className="text-xs text-gray-400">Inbox</span>
-          </div>
-          <div className="text-center">
-            <CreditCard className="h-6 w-6 text-gray-400 mx-auto mb-1" />
+          </button>
+          <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95">
+            <CreditCardIcon className="h-6 w-6 text-gray-400 mx-auto" />
             <span className="text-xs text-gray-400">Cards</span>
-          </div>
-          <div className="text-center">
-            <User className="h-6 w-6 text-gray-400 mx-auto mb-1" />
+          </button>
+          <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95">
+            <UserIcon className="h-6 w-6 text-gray-400 mx-auto" />
             <span className="text-xs text-gray-400">Profile</span>
-          </div>
-          <div className="text-center" onClick={() => onNavigate("settings")}>
-            <Settings className="h-6 w-6 text-gray-400 mx-auto mb-1" />
+          </button>
+          <button className="flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => onNavigate("settings")}>
+            <CogIcon className="h-6 w-6 text-gray-400 mx-auto" />
             <span className="text-xs text-gray-400">Settings</span>
-          </div>
+          </button>
         </div>
       </div>
     </div>

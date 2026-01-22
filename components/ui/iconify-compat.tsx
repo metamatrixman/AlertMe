@@ -80,11 +80,19 @@ export const Bell = makeComponent("Bell");
 export const FileText = makeComponent("FileText");
 export const ClipboardList = makeComponent("ClipboardList");
 export const ArrowLeftRight = makeComponent("ArrowLeftRight");
+export const Activity = makeComponent("Activity");
+export const PiggyBank = makeComponent("PiggyBank");
+export const Network = makeComponent("Network");
+export const Users = makeComponent("Users");
+export const HelpCircle = makeComponent("HelpCircle");
+export const Archive = makeComponent("Archive");
 
 // Heroicons used by components/ui/heroicons.tsx
 export const HomeIcon = makeComponent("HomeIcon", "heroicons-solid");
 export const UserIcon = makeComponent("UserIcon", "heroicons-solid");
 export const CogIcon = makeComponent("CogIcon", "heroicons-solid");
+export const InboxIcon = makeComponent("InboxIcon", "heroicons-solid");
+export const CreditCardIcon = makeComponent("CreditCardIcon", "heroicons-solid");
 
 // Default export for any dynamic access
 const All = {
@@ -153,9 +161,17 @@ const All = {
   FileText,
   ClipboardList,
   ArrowLeftRight,
+  Activity,
+  PiggyBank,
+  Network,
+  Users,
+  HelpCircle,
+  Archive,
   HomeIcon,
   UserIcon,
   CogIcon,
+  InboxIcon,
+  CreditCardIcon,
 };
 
 export default All;

@@ -30,7 +30,8 @@ const PHONE_BASED_WALLETS = [
   "Kuda Bank",
   "Fairmoney",
   "NowNow Digital Systems",
-  "MoMo PSB (MTN)"
+  "MoMo PSB (MTN)",
+  "MONIPOINT MFB"
 ]
 
 interface EnhancedNewBeneficiaryProps {

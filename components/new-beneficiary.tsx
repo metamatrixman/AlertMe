@@ -182,7 +182,7 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
                   <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
                   <div>
                     <div className="text-sm font-medium">Savings account</div>
-                    <div className="text-xs text-gray-600">ADEFEMI JOHN OLAYEMI</div>
+                    <div className="text-xs text-gray-600">{dataStore.getUserData().name}</div>
                   </div>
                 </div>
                 <ChevronDown className="h-5 w-5 text-gray-400" />
@@ -280,15 +280,17 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
             </div>
 
             {/* Save as Beneficiary */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 bg-blue-50 p-3 rounded-lg border border-blue-200">
               <Checkbox
                 id="save-beneficiary"
                 checked={watch("saveAsBeneficiary")}
                 onCheckedChange={(checked) => setValue("saveAsBeneficiary", !!checked)}
+                className="h-5 w-5"
               />
-              <label htmlFor="save-beneficiary" className="text-sm font-medium text-gray-700">
+              <label htmlFor="save-beneficiary" className="text-sm font-medium text-gray-700 cursor-pointer flex-1">
                 Save as beneficiary
               </label>
+              <span className="text-xs text-blue-600 font-medium">Recommended</span>
             </div>
 
             {/* Continue Button */}

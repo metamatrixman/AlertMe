@@ -4,6 +4,7 @@ import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ChevronDown, Home } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
+import { dataStore } from "@/lib/data-store"
 
 interface TransferScreenProps {
   onBack: () => void
@@ -12,6 +13,9 @@ interface TransferScreenProps {
 }
 
 function TransferScreenComponent({ onBack, onNavigate, transferData }: TransferScreenProps) {
+  const userData = dataStore.getUserData()
+  const transferFee = 30.0
+
   const handleContinue = () => {
     onNavigate("pin-confirmation", transferData)
   }
@@ -39,7 +43,7 @@ function TransferScreenComponent({ onBack, onNavigate, transferData }: TransferS
               <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
               <div>
                 <div className="text-sm font-medium">Savings account</div>
-                <div className="text-xs text-gray-600">ADEFEMI JOHN OLAYEMI</div>
+                <div className="text-xs text-gray-600">{userData.name}</div>
               </div>
             </div>
             <ChevronDown className="h-5 w-5 text-gray-400" />
@@ -50,8 +54,8 @@ function TransferScreenComponent({ onBack, onNavigate, transferData }: TransferS
         <div>
           <label className="text-sm font-medium text-gray-700 mb-2 block">To Beneficiary</label>
           <div className="bg-gray-100 rounded-lg p-4">
-            <div className="font-medium text-sm mb-1">{transferData?.beneficiaryName || "Pedro Banabas"}</div>
-            <div className="text-xs text-gray-500">{transferData?.bank || "Firstbank"}</div>
+            <div className="font-medium text-sm mb-1">{transferData?.beneficiaryName}</div>
+            <div className="text-xs text-gray-500">{transferData?.bank}</div>
           </div>
         </div>
 
@@ -64,7 +68,7 @@ function TransferScreenComponent({ onBack, onNavigate, transferData }: TransferS
             </div>
           </div>
           <div className="text-right mt-2">
-            <span className="text-sm text-[#004A9F]">Transfer fees: ₦ 30.00</span>
+            <span className="text-sm text-[#004A9F]">Transfer fees: ₦ {transferFee.toFixed(2)}</span>
           </div>
         </div>
       </div>

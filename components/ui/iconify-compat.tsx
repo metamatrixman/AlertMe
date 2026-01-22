@@ -86,6 +86,8 @@ export const Network = makeComponent("Network");
 export const Users = makeComponent("Users");
 export const HelpCircle = makeComponent("HelpCircle");
 export const Archive = makeComponent("Archive");
+export const Wallet = makeComponent("Wallet");
+export const RefreshCw = makeComponent("RefreshCw");
 
 // Heroicons used by components/ui/heroicons.tsx
 export const HomeIcon = makeComponent("HomeIcon", "heroicons-solid");
@@ -167,6 +169,8 @@ const All = {
   Users,
   HelpCircle,
   Archive,
+  Wallet,
+  RefreshCw,
   HomeIcon,
   UserIcon,
   CogIcon,

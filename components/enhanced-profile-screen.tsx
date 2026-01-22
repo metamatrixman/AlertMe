@@ -129,8 +129,17 @@ export function EnhancedProfileScreen({ onBack }: EnhancedProfileScreenProps) {
               </div>
             </div>
             <div>
-              <Label className="text-sm text-gray-600">BVN</Label>
-              <div className="font-medium">{profile.bvn}</div>
+              <Label htmlFor="bvn" className="text-sm text-gray-600">BVN</Label>
+              {isEditing ? (
+                <Input
+                  id="bvn"
+                  value={editedProfile.bvn}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, bvn: e.target.value })}
+                  placeholder="Enter BVN"
+                />
+              ) : (
+                <div className="font-medium">{profile.bvn}</div>
+              )}
             </div>
           </CardContent>
         </Card>

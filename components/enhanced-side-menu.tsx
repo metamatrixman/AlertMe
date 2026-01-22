@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { EnhancedBankServiceStatus } from "@/components/enhanced-bank-service-status"
+import { dataStore } from "@/lib/data-store"
 import {
   Building2,
   Send,
@@ -33,7 +34,7 @@ export function EnhancedSideMenu({ isOpen, onClose, onNavigate }: EnhancedSideMe
     { icon: CreditCard, label: "Quick Loan", screen: "loans" },
     { icon: Smartphone, label: "Airtime and Data", screen: "pay-bills" },
     { icon: MoreHorizontal, label: "Others", screen: "dashboard" },
-    { icon: User, label: "Profile", screen: "profile" },
+    { icon: User, label: "Profile", screen: "beneficiary-management" },
   ]
 
   return (
@@ -45,10 +46,10 @@ export function EnhancedSideMenu({ isOpen, onClose, onNavigate }: EnhancedSideMe
             <div className="p-6 border-b">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full bg-orange-500 flex items-center justify-center">
-                  <span className="text-white text-xl font-bold">A</span>
+                  <span className="text-white text-xl font-bold">{dataStore.getUserData().name.charAt(0)}</span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">ADEFEMI JOHN OLAYEMI</h3>
+                  <h3 className="font-semibold text-lg">{dataStore.getUserData().name}</h3>
                   <p className="text-sm text-gray-600">Last login: June 26, 2023 10:30</p>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => setShowServiceStatus(true)}>

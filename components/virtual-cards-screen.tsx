@@ -125,7 +125,7 @@ export function VirtualCardsScreen({ onBack, onNavigate }: VirtualCardsScreenPro
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <div className="bg-white px-4 py-4 flex items-center justify-between border-b">
         <Button variant="ghost" size="icon" onClick={onBack}>
@@ -267,9 +267,9 @@ export function VirtualCardsScreen({ onBack, onNavigate }: VirtualCardsScreenPro
 
       {/* Create Card Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-sm mx-auto">
-          <DialogHeader>
-            <DialogTitle>Create Virtual Card</DialogTitle>
+        <DialogContent className="max-w-sm mx-auto bg-white dark:bg-gray-900">
+          <DialogHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 -m-6 mb-4 p-6 rounded-t-2xl border-b border-gray-200/50 dark:border-gray-700/50">
+            <DialogTitle className="text-base font-semibold">Create Virtual Card</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">

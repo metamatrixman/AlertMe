@@ -786,9 +786,9 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
 
       {/* Template Editor Modal */}
       <Dialog open={showTemplateModal} onOpenChange={setShowTemplateModal}>
-        <DialogContent className="max-w-md mx-auto max-h-[85vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>{editingTemplate ? "Edit Template" : "Create New Template"}</DialogTitle>
+        <DialogContent className="max-w-md mx-auto max-h-[85vh] overflow-hidden bg-white dark:bg-gray-900">
+          <DialogHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 -m-6 mb-4 p-4 rounded-t-2xl border-b border-gray-200/50 dark:border-gray-700/50">
+            <DialogTitle className="text-base font-semibold">{editingTemplate ? "Edit Template" : "Create New Template"}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
@@ -891,9 +891,9 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
 
       {/* Preview Modal */}
       <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
-        <DialogContent className="max-w-sm mx-auto">
-          <DialogHeader>
-            <DialogTitle>Template Preview</DialogTitle>
+        <DialogContent className="max-w-sm mx-auto bg-white dark:bg-gray-900">
+          <DialogHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 -m-6 mb-4 p-6 rounded-t-2xl border-b border-gray-200/50 dark:border-gray-700/50">
+            <DialogTitle className="text-base font-semibold">Template Preview</DialogTitle>
           </DialogHeader>
 
           {previewTemplate && (

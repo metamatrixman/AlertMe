@@ -550,6 +550,26 @@ class DataStore {
     return id
   }
 
+  deleteBeneficiary(id: string): boolean {
+    const initialLength = this.state.beneficiaries.length
+    this.state.beneficiaries = this.state.beneficiaries.filter((b) => b.id !== id)
+    const deleted = this.state.beneficiaries.length < initialLength
+    if (deleted) {
+      this.notify()
+    }
+    return deleted
+  }
+
+  updateBeneficiary(id: string, updates: Partial<Beneficiary>): boolean {
+    const beneficiary = this.state.beneficiaries.find((b) => b.id === id)
+    if (beneficiary) {
+      Object.assign(beneficiary, updates)
+      this.notify()
+      return true
+    }
+    return false
+  }
+
   // Notification methods
   getNotifications(): Notification[] {
     return [...this.state.notifications].sort(

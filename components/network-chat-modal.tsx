@@ -72,7 +72,7 @@ export function NetworkChatModal({ isOpen, onClose }: NetworkChatModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto h-[600px] p-0">
+      <DialogContent className="max-w-md mx-auto h-[600px] p-0 bg-white dark:bg-gray-900 rounded-2xl">
         {!selectedUser ? (
           // User List View
           <>

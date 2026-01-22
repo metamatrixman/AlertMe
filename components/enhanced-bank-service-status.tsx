@@ -71,9 +71,9 @@ export function EnhancedBankServiceStatus({ isOpen, onClose }: EnhancedBankServi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto max-h-[85vh] overflow-hidden p-4">
-        <DialogHeader className="pb-2">
-          <DialogTitle className="text-lg">Service Status</DialogTitle>
+      <DialogContent className="max-w-md mx-auto max-h-[85vh] overflow-hidden bg-white dark:bg-gray-900">
+        <DialogHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 -m-6 mb-4 p-4 rounded-t-2xl border-b border-gray-200/50 dark:border-gray-700/50">
+          <DialogTitle className="text-base font-semibold">Service Status</DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="h-[70vh]">

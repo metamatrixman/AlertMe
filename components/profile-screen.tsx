@@ -75,7 +75,7 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <div className="bg-white px-4 py-4 flex items-center justify-between border-b">
         <Button variant="ghost" size="icon" onClick={onBack}>
@@ -148,8 +148,17 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
               </div>
             </div>
             <div>
-              <Label className="text-sm text-gray-600">BVN</Label>
-              <div className="font-medium">{profile.bvn}</div>
+              <Label htmlFor="bvn" className="text-sm text-gray-600">BVN</Label>
+              {isEditing ? (
+                <Input
+                  id="bvn"
+                  value={editedProfile.bvn}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, bvn: e.target.value })}
+                  placeholder="Enter your BVN"
+                />
+              ) : (
+                <div className="font-medium">{profile.bvn}</div>
+              )}
             </div>
           </CardContent>
         </Card>

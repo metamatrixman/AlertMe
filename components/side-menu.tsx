@@ -82,7 +82,7 @@ export function SideMenu({ isOpen, onClose, onNavigate }: SideMenuProps) {
                 <div 
                   className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white"
                   onClick={() => {
-                    onNavigate("profile")
+                    onNavigate("beneficiary-management")
                     onClose()
                   }}
                   role="button"
@@ -101,7 +101,7 @@ export function SideMenu({ isOpen, onClose, onNavigate }: SideMenuProps) {
                 <div 
                   className="flex-1 min-w-0 cursor-pointer"
                   onClick={() => {
-                    onNavigate("profile")
+                    onNavigate("beneficiary-management")
                     onClose()
                   }}
                   role="button"

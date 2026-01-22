@@ -101,7 +101,7 @@ export function CurrencyScreen({ onBack, onNavigate }: CurrencyScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <div className="bg-white px-4 py-4 flex items-center justify-between border-b">
         <Button variant="ghost" size="icon" onClick={onBack}>
@@ -231,14 +231,14 @@ export function CurrencyScreen({ onBack, onNavigate }: CurrencyScreenProps) {
                     <div className="text-gray-600">Amount Sent</div>
                     <div className="font-medium">
                       {transaction.from === "NGN" ? "₦" : "$"}
-                      {formatCurrencyFn(transaction.amount)}
+                      {formatCurrency(transaction.amount)}
                     </div>
                   </div>
                   <div>
                     <div className="text-gray-600">Amount Received</div>
                     <div className="font-medium">
                       {transaction.to === "NGN" ? "₦" : "$"}
-                      {formatCurrencyFn(transaction.converted)}
+                      {formatCurrency(transaction.converted)}
                     </div>
                   </div>
                   <div>

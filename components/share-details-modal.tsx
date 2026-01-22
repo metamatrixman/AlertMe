@@ -50,9 +50,9 @@ Send money easily with Ecobank Mobile!`
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm mx-auto">
-        <DialogHeader>
-          <DialogTitle className="text-center">Share Details</DialogTitle>
+      <DialogContent className="max-w-sm mx-auto bg-white dark:bg-gray-900">
+        <DialogHeader className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 -m-6 mb-4 p-6 rounded-t-2xl border-b border-gray-200/50 dark:border-gray-700/50">
+          <DialogTitle className="text-center text-base font-semibold">Share Details</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">

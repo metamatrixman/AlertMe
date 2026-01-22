@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -182,7 +183,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
       {/* Quick Transaction */}
       <div className="px-4 mb-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-900">QUICK TRANSACTION</h3>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-4">
           {[
             { label: "Add Money", icon: ArrowDownToLine, action: "add-money" },
             { label: "Send Money", icon: ArrowUpFromLine, action: "transfer-options" },
@@ -191,47 +192,64 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
           ].map((item, idx) => (
             <div key={item.action} className="text-center">
               <Button
-                variant="outline"
                 size="icon"
-                className="w-12 h-12 rounded-full mb-2 border-2 border-[#004A9F] text-[#004A9F] bg-white hover:bg-[#004A9F] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md touch-target mx-auto active:scale-95"
+                className="w-14 h-14 rounded-full mb-3 bg-[#004A9F] text-white hover:bg-[#003875] transition-all duration-200 shadow-md hover:shadow-lg touch-target mx-auto active:scale-95 flex items-center justify-center"
                 onClick={() => handleQuickAction(item.action)}
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-6 w-6" />
               </Button>
-              <span className="text-xs font-medium text-gray-700">{item.label}</span>
+              <span className="text-xs font-semibold text-gray-800 block text-center">{item.label}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Expandable More Section */}
-      {isMoreExpanded && (
-        <div className="px-4 mb-6">
-          <div className="bg-white rounded-lg p-4 card-shadow border border-gray-100">
-            <h4 className="text-sm font-semibold mb-3 text-gray-900">Additional Services</h4>
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { label: "Loans", icon: CreditCardIcon, action: "loans" },
-                { label: "Cards", icon: CreditCardIcon, action: "virtual-cards" },
-                { label: "POS", icon: Smartphone, action: "pos" },
-                { label: "Currency", icon: Globe, action: "currency" },
-              ].map((item) => (
-                <div key={item.action} className="text-center">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-12 h-12 rounded-full mb-2 border-2 border-[#004A9F] text-[#004A9F] bg-white hover:bg-[#004A9F] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md touch-target mx-auto active:scale-95"
-                    onClick={() => handleAdditionalService(item.action)}
+      <AnimatePresence>
+        {isMoreExpanded && (
+          <motion.div
+            className="px-4 mb-6"
+            initial={{ opacity: 0, height: 0, y: -20 }}
+            animate={{ opacity: 1, height: "auto", y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <motion.div
+              className="bg-white rounded-lg p-4 card-shadow border border-gray-100"
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.2 }}
+            >
+              <h4 className="text-sm font-semibold mb-3 text-gray-900">Additional Services</h4>
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { label: "Loans", icon: CreditCardIcon, action: "loans" },
+                  { label: "Cards", icon: CreditCardIcon, action: "virtual-cards" },
+                  { label: "POS", icon: Smartphone, action: "pos" },
+                  { label: "Currency", icon: Globe, action: "currency" },
+                ].map((item, idx) => (
+                  <motion.div
+                    key={item.action}
+                    className="text-center"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + idx * 0.05, duration: 0.3 }}
                   >
-                    <item.icon className="h-5 w-5" />
-                  </Button>
-                  <span className="text-xs font-medium text-gray-700">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+                    <Button
+                      size="icon"
+                      className="w-14 h-14 rounded-full mb-3 bg-[#004A9F] text-white hover:bg-[#003875] transition-all duration-200 shadow-md hover:shadow-lg touch-target mx-auto active:scale-95"
+                      onClick={() => handleAdditionalService(item.action)}
+                    >
+                      <item.icon className="h-6 w-6" />
+                    </Button>
+                    <span className="text-xs font-semibold text-gray-800 block text-center">{item.label}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="px-4 mb-24">
         {showRecentTransactions ? (
@@ -314,40 +332,37 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg safe-area-inset-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg safe-area-inset-bottom z-40">
         <div className="flex justify-around items-center max-w-screen-sm mx-auto">
           {[
             { label: "Home", icon: HomeIcon, color: "#004A9F", isActive: true },
             { label: "Inbox", icon: InboxIcon, action: "notifications", notification: unreadCount, color: "#004A9F" },
             { label: "Cards", icon: CreditCardIcon, action: "virtual-cards", color: "#004A9F" },
-            { label: "Profile", icon: UserIcon, action: "profile", color: "#004A9F" },
+            { label: "Beneficiaries", icon: UserIcon, action: "beneficiary-management", color: "#004A9F" },
             { label: "Settings", icon: CogIcon, action: "settings", color: "#004A9F" },
           ].map((item) => (
             <button
               key={item.label}
-              className="flex flex-col items-center justify-center gap-1 flex-1 cursor-pointer touch-target transition-all duration-200 hover:scale-105 active:scale-95"
+              className="flex flex-col items-center justify-center gap-1 flex-1 cursor-pointer touch-target transition-all duration-200 hover:scale-110 active:scale-95"
               onClick={() => item.action && onNavigate(item.action)}
+              title={item.label}
             >
               <div className="relative">
                 {item.icon && (
                   <item.icon
-                    className={`h-6 w-6 transition-colors duration-200 ${
-                      item.isActive ? `text-[${item.color}]` : "text-gray-400"
-                    }`}
-                    style={item.isActive ? { color: item.color } : undefined}
+                    className="h-6 w-6 transition-colors duration-200"
+                    style={item.isActive ? { color: item.color } : { color: "#9CA3AF" }}
                   />
                 )}
                 {item.notification && item.notification > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px] shadow-md">
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px] shadow-md">
                     {item.notification > 9 ? "9+" : item.notification}
                   </span>
                 )}
               </div>
               <span
-                className={`text-xs font-medium transition-colors duration-200 ${
-                  item.isActive ? "text-[#004A9F]" : "text-gray-400"
-                }`}
-                style={item.isActive ? { color: item.color } : undefined}
+                className="text-xs font-semibold transition-colors duration-200 whitespace-nowrap"
+                style={item.isActive ? { color: item.color } : { color: "#9CA3AF" }}
               >
                 {item.label}
               </span>

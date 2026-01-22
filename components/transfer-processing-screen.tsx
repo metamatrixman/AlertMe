@@ -38,6 +38,23 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
           setIsProcessing(false)
 
           try {
+            // Save beneficiary if requested
+            if (transferData.saveAsBeneficiary) {
+              try {
+                dataStore.addBeneficiary({
+                  name: transferData.beneficiaryName || "Recipient",
+                  bank: transferData.bank,
+                  accountNumber: transferData.accountNumber,
+                  phone: transferData.phone || "",
+                })
+                console.log("[v0] Beneficiary saved successfully")
+              } catch (err) {
+                console.warn("[v0] Failed to save beneficiary:", err)
+                // Don't fail the transaction if beneficiary save fails
+              }
+            }
+
+            // Add transaction
             dataStore
               .addTransaction({
                 type: `Transfer to ${transferData.bank}`,

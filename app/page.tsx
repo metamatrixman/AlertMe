@@ -80,7 +80,7 @@ export default function Home() {
       case "new-beneficiary":
         return <NewBeneficiary onBack={handleBack} onNavigate={handleNavigate} />
       case "transfer":
-        return <TransferScreen onBack={handleBack} onNavigate={handleNavigate} />
+        return <TransferScreen onBack={handleBack} onNavigate={handleNavigate} transferData={transferData} />
       case "pin-confirmation":
         return <PinConfirmation onBack={handleBack} onNavigate={handleNavigate} transferData={transferData} />
       case "transaction-success":

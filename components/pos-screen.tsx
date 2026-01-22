@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Smartphone, MapPin, Clock, CreditCard, QrCode, Home } from "@/components/ui/iconify-compat"
+import { formatCurrency } from "@/lib/form-utils"
 
 interface POSScreenProps {
   onBack: () => void
@@ -92,7 +93,7 @@ export function POSScreen({ onBack, onNavigate }: POSScreenProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <div className="bg-white px-4 py-4 flex items-center justify-between border-b">
         <Button variant="ghost" size="icon" onClick={onBack}>

@@ -131,7 +131,7 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
       icon: User,
       label: "User Profile",
       description: "Manage account settings",
-      onClick: () => onNavigate("profile"),
+      onClick: () => onNavigate("beneficiary-management"),
     },
     {
       icon: Palette,
@@ -169,7 +169,7 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <div className="bg-white px-4 py-4 flex items-center justify-between border-b">
         <Button variant="ghost" size="icon" onClick={onBack}>

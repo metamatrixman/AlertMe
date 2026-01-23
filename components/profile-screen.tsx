@@ -23,18 +23,16 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
   const [profile, setProfile] = useState(dataStore.getUserData())
   const [editedProfile, setEditedProfile] = useState(profile)
 
-  // Load profile picture from IndexedDB if it exists
+  // Load profile picture from persistent storage on mount
   useEffect(() => {
     const loadProfilePicture = async () => {
       try {
-        const idbPicture = await StorageManager.load<string>("ecobank_profile_picture", "")
-        if (idbPicture && !profile.profilePicture) {
-          const updatedProfile = { ...profile, profilePicture: idbPicture }
-          setProfile(updatedProfile)
-          setEditedProfile(updatedProfile)
-        }
+        await dataStore.loadProfilePicture()
+        const updatedProfile = dataStore.getUserData()
+        setProfile(updatedProfile)
+        setEditedProfile(updatedProfile)
       } catch (error) {
-        console.warn("[v0] Failed to load profile picture from IndexedDB:", error)
+        console.warn("[ProfileScreen] Failed to load profile picture:", error)
       }
     }
 
@@ -47,6 +45,8 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
       const reader = new FileReader()
       reader.onloadend = () => {
         const base64String = reader.result as string
+        // Update the profile picture with the persistent base64 string
+        dataStore.updateProfilePicture(base64String)
         setEditedProfile({ ...editedProfile, profilePicture: base64String })
       }
       reader.readAsDataURL(file)

@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Palette, Check } from "@/components/ui/iconify-compat"
-import { hexToHsl } from "@/lib/theme-utils"
+import { hexToHsl, applyTheme } from "@/lib/theme-utils"
+import type { StoredTheme } from "@/lib/theme-utils"
+import { useToast } from "@/hooks/use-toast"
 
 interface ThemeCustomizerProps {
   onBack: () => void
@@ -29,6 +31,8 @@ interface Theme {
 
 export function ThemeCustomizer({ onBack }: ThemeCustomizerProps) {
   const [selectedTheme, setSelectedTheme] = useState("ecobank")
+  const [isApplying, setIsApplying] = useState(false)
+  const { toast } = useToast()
 
   // Helper function to convert hex to RGB values
   const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
@@ -282,31 +286,37 @@ export function ThemeCustomizer({ onBack }: ThemeCustomizerProps) {
 
   const handleThemeSelect = (themeId: string) => {
     setSelectedTheme(themeId)
-    // Apply theme to document root
-    const theme = themes.find((t) => t.id === themeId)
-    if (theme) {
-      // Convert hex colors to HSL and apply to CSS variables
-      const primaryHsl = hexToHsl(theme.primary)
-      const secondaryHsl = hexToHsl(theme.secondary)
-      const accentHsl = hexToHsl(theme.accent)
-      const backgroundHsl = hexToHsl(theme.background)
+  }
 
-      document.documentElement.style.setProperty("--primary", primaryHsl)
-      document.documentElement.style.setProperty("--secondary", secondaryHsl)
-      document.documentElement.style.setProperty("--accent", accentHsl)
-      document.documentElement.style.setProperty("--background", backgroundHsl)
+  const handleApplyTheme = async () => {
+    const theme = themes.find((t) => t.id === selectedTheme)
+    if (!theme) {
+      toast({ title: "Error", description: "Theme not found", variant: "destructive" })
+      return
+    }
 
-      // Also set the Tailwind color values directly for components that use hardcoded colors
-      document.documentElement.style.setProperty("--primary-color", theme.primary)
-      document.documentElement.style.setProperty("--secondary-color", theme.secondary)
-      document.documentElement.style.setProperty("--accent-color", theme.accent)
-      document.documentElement.style.setProperty("--background-color", theme.background)
-
-      // Save theme preference
-      localStorage.setItem("ecobank-theme", JSON.stringify({ themeId, ...theme }))
+    setIsApplying(true)
+    
+    try {
+      const storedTheme: StoredTheme = {
+        themeId: selectedTheme,
+        name: theme.name,
+        primary: theme.primary,
+        secondary: theme.secondary,
+        accent: theme.accent,
+        background: theme.background,
+      }
       
-      // Trigger a change event to notify other components
-      window.dispatchEvent(new CustomEvent("themeChanged", { detail: { themeId, theme } }))
+      // Apply theme using the centralized function
+      applyTheme(storedTheme)
+      
+      toast({ title: "Success!", description: `${theme.name} theme applied successfully` })
+      
+      setIsApplying(false)
+    } catch (error) {
+      console.error("Error applying theme:", error)
+      toast({ title: "Error", description: "Failed to apply theme", variant: "destructive" })
+      setIsApplying(false)
     }
   }
 
@@ -422,10 +432,11 @@ export function ThemeCustomizer({ onBack }: ThemeCustomizerProps) {
 
         {/* Apply Theme Button */}
         <Button
-          onClick={() => handleThemeSelect(selectedTheme)}
-          className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3"
+          onClick={handleApplyTheme}
+          disabled={isApplying}
+          className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3 disabled:opacity-50"
         >
-          Apply Selected Theme
+          {isApplying ? "Applying..." : "Apply Selected Theme"}
         </Button>
       </div>
     </div>

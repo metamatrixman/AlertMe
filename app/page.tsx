@@ -89,7 +89,7 @@ export default function Home() {
         return <SettingsScreen onBack={handleBack} onNavigate={handleNavigate} />
       case "profile":
         return <EnhancedProfileScreen onBack={handleBack} />
-      case "beneficiaries":
+      case "beneficiary-management":
         return <BeneficiaryManagement onBack={handleBack} />
       case "themes":
         return <ThemeCustomizer onBack={handleBack} />

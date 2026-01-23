@@ -285,7 +285,7 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
       </div>
 
       {/* Modals */}
-      <ShareDetailsModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} />
+      <ShareDetailsModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} recipientPhone={userData?.phone} />
       <NetworkChatModal isOpen={showNetworkModal} onClose={() => setShowNetworkModal(false)} />
       <BankServiceStatus isOpen={showServiceStatus} onClose={() => setShowServiceStatus(false)} />
       <AddFundsModal isOpen={showAddFunds} onClose={() => setShowAddFunds(false)} />

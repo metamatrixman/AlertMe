@@ -118,6 +118,9 @@ class DataStore {
         console.warn("Failed to request persistent storage:", err),
       )
 
+      // Load profile picture from persistent storage asynchronously
+      this.loadProfilePicture().catch((err) => console.warn("Failed to load profile picture on init:", err))
+
       // Auto-save with debouncing
       window.addEventListener("beforeunload", () => this.saveToStorage())
     }
@@ -449,6 +452,24 @@ class DataStore {
     this.notify()
   }
 
+  async loadProfilePicture(): Promise<void> {
+    try {
+      // Try to load from IndexedDB first (for large images)
+      const indexedDBPicture = await StorageManager.load<string>("ecobank_profile_picture", "")
+      if (indexedDBPicture) {
+        this.state.userData.profilePicture = indexedDBPicture
+        this.notify()
+        return
+      }
+
+      // If no IndexedDB picture, check if the current profile picture is already loaded
+      // The profile picture should already be loaded from the main state during initialization
+      // This method ensures we have the most up-to-date version from persistent storage
+    } catch (error) {
+      console.warn("[DataStore] Failed to load profile picture from IndexedDB:", error)
+    }
+  }
+
   // Transaction methods
   getTransactions(): Transaction[] {
     return [...this.state.transactions].sort(
@@ -650,8 +671,14 @@ class DataStore {
 
   // Utility methods
   clearAllData(): void {
+    // Save profile picture before clearing
+    const profilePicture = this.state.userData.profilePicture
     StorageManager.clear()
     this.state = this.getDefaultState()
+    // Restore profile picture if it exists
+    if (profilePicture) {
+      this.state.userData.profilePicture = profilePicture
+    }
     this.notify()
   }
 

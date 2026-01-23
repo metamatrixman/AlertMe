@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
+    "@iconify/react": "^4.1.1",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-aspect-ratio": "latest",
@@ -44,11 +45,11 @@
     "cmdk": "latest",
     "date-fns": "4.1.0",
     "embla-carousel-react": "latest",
+    "express": "^5.2.1",
     "foundation-sites": "^6.9.0",
     "framer-motion": "^12.23.26",
     "input-otp": "latest",
     "lucide-react": "^0.454.0",
-    "@iconify/react": "^4.1.1",
     "materialize-css": "^1.0.0",
     "next": "15.2.8",
     "next-themes": "latest",
@@ -61,8 +62,9 @@
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "twilio": "latest",
+    "twilio": "^5.12.0",
     "vaul": "latest",
+    "vcards-js": "^2.10.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

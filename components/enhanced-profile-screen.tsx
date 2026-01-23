@@ -20,9 +20,19 @@ export function EnhancedProfileScreen({ onBack }: EnhancedProfileScreenProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState<UserData>(dataStore.getUserData())
   const [editedProfile, setEditedProfile] = useState<UserData>(profile)
+  const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    // Load profile picture from persistent storage on mount
+    dataStore.loadProfilePicture().then(() => {
+      const updatedProfile = dataStore.getUserData()
+      setProfile(updatedProfile)
+      if (!isEditing) {
+        setEditedProfile(updatedProfile)
+      }
+    })
+
     const unsubscribe = dataStore.subscribe(() => {
       const updatedProfile = dataStore.getUserData()
       setProfile(updatedProfile)
@@ -48,16 +58,33 @@ export function EnhancedProfileScreen({ onBack }: EnhancedProfileScreenProps) {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // Create a URL for the uploaded image
-      const imageUrl = URL.createObjectURL(file)
+      setIsUploading(true)
+      
+      // Convert file to base64 for persistent storage
+      // Using FileReader.readAsDataURL() creates a data URL that persists across sessions
+      // Unlike URL.createObjectURL() which creates a temporary blob URL
+      const reader = new FileReader()
+      
+      reader.onloadend = () => {
+        const base64String = reader.result as string
+        
+        // Update the profile picture with the persistent base64 string
+        dataStore.updateProfilePicture(base64String)
 
-      // Update the profile picture immediately
-      dataStore.updateProfilePicture(imageUrl)
-
-      // Also update the edited profile if in editing mode
-      if (isEditing) {
-        setEditedProfile((prev) => ({ ...prev, profilePicture: imageUrl }))
+        // Also update the edited profile if in editing mode
+        if (isEditing) {
+          setEditedProfile((prev) => ({ ...prev, profilePicture: base64String }))
+        }
+        
+        setIsUploading(false)
       }
+      
+      reader.onerror = () => {
+        console.error("[ProfileScreen] Failed to read image file")
+        setIsUploading(false)
+      }
+      
+      reader.readAsDataURL(file)
     }
   }
 
@@ -98,6 +125,7 @@ export function EnhancedProfileScreen({ onBack }: EnhancedProfileScreenProps) {
                 size="icon"
                 className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#A4D233] hover:bg-[#8BC220] text-black"
                 onClick={triggerImageUpload}
+                disabled={isUploading}
               >
                 <Camera className="h-4 w-4" />
               </Button>
@@ -109,6 +137,9 @@ export function EnhancedProfileScreen({ onBack }: EnhancedProfileScreenProps) {
             >
               {profile.status}
             </Badge>
+            {isUploading && (
+              <div className="mt-2 text-sm text-gray-500">Uploading image...</div>
+            )}
           </CardContent>
         </Card>
 

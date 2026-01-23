@@ -12,13 +12,27 @@ export async function POST(request: NextRequest) {
     const { to, message, type } = body
 
     if (!to || !message) {
-      return NextResponse.json({ success: false, error: "Missing required fields: to, message" }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing required fields: to, message",
+          details: "Both 'to' and 'message' fields are required to send an SMS."
+        },
+        { status: 400 }
+      )
     }
 
     // Validate Twilio credentials
     if (!accountSid || !authToken || !twilioPhoneNumber) {
       console.error("Twilio credentials not configured")
-      return NextResponse.json({ success: false, error: "SMS service not configured" }, { status: 500 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "SMS service not configured",
+          details: "Twilio credentials are missing or invalid. Please check your environment variables."
+        },
+        { status: 500 }
+      )
     }
 
     // Initialize Twilio client
@@ -45,7 +59,14 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Twilio SMS Error:", error)
     const errorMessage = error instanceof Error ? error.message : "Failed to send SMS"
-    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: errorMessage,
+        details: "An error occurred while sending the SMS. Please try again later."
+      },
+      { status: 500 }
+    )
   }
 }
 

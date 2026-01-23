@@ -2,6 +2,7 @@
 
 import { generateDebitAlert, generateCreditAlert } from "./alert-templates"
 import { sendTransactionAlert } from "./sms-client"
+import { SMSService } from "./sms-service"
 import { StorageManager } from "./storage-manager"
 import { formatCurrency } from "@/lib/form-utils"
 
@@ -54,6 +55,19 @@ export interface Notification {
   read: boolean
 }
 
+export interface NotificationLog {
+  id: string
+  transactionId: string
+  type: "sms" | "email" | "push"
+  status: "pending" | "sent" | "failed" | "delivered"
+  recipient: string
+  templateUsed: string
+  timestamp: string
+  message: string
+  deliveryAttempts?: number
+  lastError?: string
+}
+
 export interface LoanApplication {
   id: string
   type: string
@@ -65,6 +79,13 @@ export interface LoanApplication {
   monthlyPayment: number
   interestRate: number
   totalRepayment: number
+  uploadedDocuments?: {
+    bankStatement?: boolean
+    employmentLetter?: boolean
+    guarantors?: boolean
+    idVerification?: boolean
+    loanDeposit?: boolean
+  }
 }
 
 export interface AppSettings {
@@ -90,6 +111,7 @@ class DataStore {
   private static instance: DataStore
   private state: AppState
   private listeners: Set<() => void> = new Set()
+  private notificationLogs: NotificationLog[] = []
   private readonly STORAGE_KEY = "ecobank_app_data"
   private readonly BACKUP_KEY = "ecobank_app_backup"
   private readonly VERSION = 1
@@ -108,6 +130,7 @@ class DataStore {
   private constructor() {
     this.state = this.loadFromStorage()
     this.initializeDefaultData()
+    this.loadNotificationLogs()
 
     // Initialize IndexedDB for better scalability
     if (typeof window !== "undefined") {
@@ -492,6 +515,16 @@ class DataStore {
       date: new Date().toISOString().split("T")[0],
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     }
+    
+    this.logNotification({
+      transactionId: id,
+      type: "sms",
+      status: "pending",
+      recipient: newTransaction.recipient || "",
+      templateUsed: newTransaction.recipientBank || "default",
+      timestamp: new Date().toISOString(),
+      message: `Transaction alert for ${newTransaction.type}`,
+    })
 
     // Ensure amount and fee are numbers rounded to 2 decimals
     newTransaction.amount = Number(Number(newTransaction.amount).toFixed(2))
@@ -540,6 +573,23 @@ class DataStore {
             type: "credit",
           })
         }
+      }
+      
+      if (newTransaction.isDebit && newTransaction.recipientBank) {
+        await SMSService.sendDynamicTransactionAlert(newTransaction.recipientBank, {
+          amount: newTransaction.amount,
+          recipient: newTransaction.recipient || "",
+          sender: this.state.userData.name,
+          balance: this.state.userData.balance,
+          reference: reference,
+          beneficiaryName: newTransaction.recipient || "",
+          accountNumber: newTransaction.recipientAccount || "",
+          description: newTransaction.description || "Transfer",
+          transactionType: newTransaction.isDebit ? "Debit" : "Credit",
+        }, {
+          includeRegulatoryDisclaimer: true,
+          includeOptOut: true
+        })
       }
     }
 
@@ -768,6 +818,32 @@ class DataStore {
   // Method to check if account exists
   hasExistingAccount(): boolean {
     return this.state.userData.accountNumber !== ""
+  }
+
+  private loadNotificationLogs(): void {
+    try {
+      const stored = StorageManager.loadSync<NotificationLog[]>("ecobank_notification_logs", [])
+      if (Array.isArray(stored)) {
+        this.notificationLogs = stored
+      }
+    } catch (error) {
+      console.warn("Failed to load notification logs:", error)
+      this.notificationLogs = []
+    }
+  }
+
+  private logNotification(log: Omit<NotificationLog, "id">): void {
+    try {
+      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      this.notificationLogs.push({ ...log, id })
+      // Keep only recent logs (last 100)
+      if (this.notificationLogs.length > 100) {
+        this.notificationLogs = this.notificationLogs.slice(-100)
+      }
+      StorageManager.saveSync("ecobank_notification_logs", this.notificationLogs)
+    } catch (error) {
+      console.warn("Failed to log notification:", error)
+    }
   }
 
   private createAutoBackup(): void {

@@ -36,11 +36,7 @@ export async function POST(request: NextRequest) {
     if (!accountSid || !authToken || !twilioPhoneNumber) {
       console.error("Twilio credentials not configured")
       return NextResponse.json(
-        {
-          success: false,
-          error: "SMS service not configured",
-          details: "Twilio credentials are missing or invalid. Please check your environment variables."
-        },
+        { success: false, error: "SMS service not configured" },
         { status: 500 }
       )
     }
@@ -90,11 +86,7 @@ Shared via Ecobank Mobile App
     console.error("Business Card SMS Error:", error)
     const errorMessage = error instanceof Error ? error.message : "Failed to send business card"
     return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-        details: "An error occurred while sending the business card. Please try again later."
-      },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }

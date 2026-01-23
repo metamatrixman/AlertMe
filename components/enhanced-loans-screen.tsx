@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Home, Plus, FileText, ClipboardList } from "@/components/ui/iconify-compat"
+import { ArrowLeft, Home, Plus, FileText, ClipboardList, Upload } from "@/components/ui/iconify-compat"
 import { dataStore, type LoanApplication } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
+import { LoanDocumentUpload } from "@/components/loan-document-upload"
 
 interface EnhancedLoansScreenProps {
   onBack: () => void
@@ -23,6 +24,7 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
   const [selectedLoanType, setSelectedLoanType] = useState("")
   const [loanApplications, setLoanApplications] = useState<LoanApplication[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedApplication, setSelectedApplication] = useState<LoanApplication | null>(null)
 
   useEffect(() => {
     setLoanApplications(dataStore.getLoanApplications())
@@ -123,6 +125,15 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
 
   const loanDetails = calculateLoanDetails()
 
+  if (selectedApplication) {
+    return (
+      <LoanDocumentUpload
+        application={selectedApplication}
+        onBack={() => setSelectedApplication(null)}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -156,7 +167,7 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
             </CardHeader>
             <CardContent className="space-y-3">
               {loanApplications.map((application) => (
-                <div key={application.id} className="p-4 bg-gray-50 rounded-lg">
+                <div key={application.id} className="p-4 bg-gray-50 rounded-lg space-y-3">
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-medium">{application.type}</div>
                     <Badge
@@ -191,6 +202,15 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
                       <div className="font-medium">{new Date(application.applicationDate).toLocaleDateString()}</div>
                     </div>
                   </div>
+                  {(application.status === "Submitted" || application.status === "Under Review") && (
+                    <Button
+                      onClick={() => setSelectedApplication(application)}
+                      className="w-full bg-[#A4D233] hover:bg-[#8BC220] text-black py-2 text-sm"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Documents
+                    </Button>
+                  )}
                 </div>
               ))}
             </CardContent>

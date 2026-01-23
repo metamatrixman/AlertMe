@@ -41,6 +41,7 @@ export default function Home() {
   const [currentScreen, setCurrentScreen] = useState("splash")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [transferData, setTransferData] = useState<any>(null)
+  const [screenHistory, setScreenHistory] = useState<string[]>([])
 
   useEffect(() => {
     const hasAccount = dataStore.hasExistingAccount()
@@ -50,6 +51,7 @@ export default function Home() {
   }, [])
 
   const handleNavigate = (screen: string, data?: any) => {
+    setScreenHistory([...screenHistory, currentScreen])
     setCurrentScreen(screen)
     if (data) {
       setTransferData(data)
@@ -58,7 +60,13 @@ export default function Home() {
   }
 
   const handleBack = () => {
-    setCurrentScreen("dashboard")
+    if (screenHistory.length > 0) {
+      const previousScreen = screenHistory[screenHistory.length - 1]
+      setScreenHistory(screenHistory.slice(0, -1))
+      setCurrentScreen(previousScreen)
+    } else {
+      setCurrentScreen("dashboard")
+    }
   }
 
   const handleMenuToggle = () => {

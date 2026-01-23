@@ -35,14 +35,9 @@ export const amountSchema = z
 
 export const accountNumberSchema = z
   .string()
-  .min(1, "Account number is required")
   .regex(/^\d{10}$/, "Account number must be exactly 10 digits");
 
-export const currencySchema = z
-  .string()
-  .min(1, "Currency is required")
-  .max(3, "Currency code must be 3 characters")
-  .regex(/^[A-Z]{3}$/, "Currency code must be in uppercase letters (e.g., USD, NGN)");
+export const currencySchema = z.string().min(1, "Currency is required");
 
 export const fileSchema = z
   .any()
@@ -60,20 +55,14 @@ export type ZodSchema<T> = z.ZodType<T>;
 export function getErrorMessage(err: unknown): string {
   if (!err) return "An unknown error occurred";
   if (typeof err === "string") return err;
-  if (err instanceof Error) {
-    // Sanitize error messages to avoid exposing sensitive data
-    const sanitizedMessage = err.message.replace(/\b(?:password|token|key|secret|account)\b/gi, "[REDACTED]");
-    return sanitizedMessage;
-  }
+  if (err instanceof Error) return err.message;
   try {
     // Handle common shapes like { message } or { data: { message } }
     if (err && typeof err === "object" && "message" in (err as any) && typeof (err as any).message === "string") {
-      const sanitizedMessage = (err as any).message.replace(/\b(?:password|token|key|secret|account)\b/gi, "[REDACTED]");
-      return sanitizedMessage;
+      return (err as any).message;
     }
     if (err && typeof err === "object" && "data" in (err as any) && typeof (err as any).data?.message === "string") {
-      const sanitizedMessage = (err as any).data.message.replace(/\b(?:password|token|key|secret|account)\b/gi, "[REDACTED]");
-      return sanitizedMessage;
+      return (err as any).data.message;
     }
   } catch {
     // ignore

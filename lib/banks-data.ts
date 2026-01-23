@@ -58,4 +58,5 @@ export const NIGERIAN_BANKS: BankData[] = [
   { name: "MoMo PSB (MTN)", code: "999994", type: "wallet" },
   { name: "Renmoney", code: "090322", type: "wallet" },
   { name: "MONIPOINT MFB", code: "090090", type: "wallet" },
+  { name: "Plam Pay", code: "090091", type: "wallet" },
 ]

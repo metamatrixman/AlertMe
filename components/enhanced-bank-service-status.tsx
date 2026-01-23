@@ -24,7 +24,7 @@ export function EnhancedBankServiceStatus({ isOpen, onClose }: EnhancedBankServi
   // Generate service status for all banks and wallets
   const generateServiceStatus = (): ServiceStatus[] => {
     // Banks and wallets that should be set to 10% red (down status)
-    const redServices = ["Opay", "Monipoint", "Access Bank", "Ecobank Nigeria"]
+    const redServices = ["Opay", "Monipoint MFB", "Plam Pay", "Access Bank", "Ecobank Nigeria"]
 
     return NIGERIAN_BANKS.map((bank) => {
       const isRedService = redServices.some(

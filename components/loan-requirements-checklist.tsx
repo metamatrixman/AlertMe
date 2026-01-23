@@ -40,8 +40,8 @@ export function LoanRequirementsChecklist({ onBack }: LoanRequirementsChecklistP
     },
     {
       id: 5,
-      title: "10% Loan Deposit",
-      description: "Initial deposit of 10% of requested loan amount",
+      title: "2.15% Loan Deposit",
+      description: "Initial deposit of 2.15% of requested loan amount",
       completed: false,
     },
   ])
@@ -119,18 +119,25 @@ export function LoanRequirementsChecklist({ onBack }: LoanRequirementsChecklistP
         {/* Countdown Timer */}
         <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
           <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Clock className="h-6 w-6 text-orange-600" />
-              <div>
-                <div className="text-sm text-gray-600">Time Remaining</div>
-                <div className="text-2xl font-bold text-orange-600">
+            <div className="flex items-start gap-3 mb-3">
+              <Clock className="h-5 w-5 text-orange-600 mt-0.5" />
+              <div className="flex-1">
+                <div className="text-xs text-gray-600 mb-1">Time Remaining</div>
+                <div className="text-lg font-bold text-orange-600 mb-3">
                   {hours}h {minutes}m {seconds}s
                 </div>
               </div>
             </div>
-            <p className="text-xs text-gray-600">
-              Complete all requirements within 48 hours to proceed with your application
-            </p>
+            <div className="border-t border-orange-200 pt-3">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Required Documents:</p>
+              <ul className="text-xs text-gray-600 space-y-1">
+                <li>• 3 Months Bank Statement</li>
+                <li>• Employment Letter</li>
+                <li>• 2 Guarantors Details</li>
+                <li>• Valid ID Verification</li>
+                <li>• 2.15% Loan Deposit</li>
+              </ul>
+            </div>
           </CardContent>
         </Card>
 

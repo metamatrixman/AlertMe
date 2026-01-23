@@ -19,6 +19,7 @@ interface BeneficiaryUIData {
   bank: string
   accountNumber: string
   phone?: string
+  balance?: string
   type?: "Business" | "P2P"
   location?: string
 }
@@ -64,6 +65,7 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
     bank: "",
     accountNumber: "",
     phone: "",
+    balance: "",
     type: "P2P",
     location: "Nigeria",
   })
@@ -95,6 +97,7 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
           bank: "",
           accountNumber: "",
           phone: "",
+          balance: "",
           type: "P2P",
           location: "Nigeria",
         })
@@ -138,6 +141,7 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
           bank: "",
           accountNumber: "",
           phone: "",
+          balance: "",
           type: "P2P",
           location: "Nigeria",
         })
@@ -187,6 +191,7 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
               bank: "",
               accountNumber: "",
               phone: "",
+              balance: "",
               type: "P2P",
               location: "Nigeria",
             })
@@ -374,6 +379,18 @@ export function BeneficiaryManagement({ onBack }: BeneficiaryManagementProps) {
                 value={newBeneficiary.phone || ""}
                 onChange={(e) => setNewBeneficiary({ ...newBeneficiary, phone: e.target.value })}
                 placeholder="Enter phone number"
+                className="bg-white"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="balance">Account Balance</Label>
+              <Input
+                id="balance"
+                value={newBeneficiary.balance || ""}
+                onChange={(e) => setNewBeneficiary({ ...newBeneficiary, balance: e.target.value })}
+                placeholder="Enter account balance"
+                inputMode="numeric"
                 className="bg-white"
               />
             </div>

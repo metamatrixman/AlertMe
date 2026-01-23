@@ -1,11 +1,11 @@
-"use server"
-
 import {
   generateDebitAlert,
   generateCreditAlert,
   generateBalanceInquiryAlert,
   generateLowBalanceAlert,
+  getAllSMSTemplates,
 } from "./alert-templates"
+import { NIGERIAN_BANKS } from "./banks-data"
 
 export interface SMSAlert {
   to: string
@@ -91,6 +91,130 @@ export class SMSService {
     }
   }
 
+  static async sendDynamicTransactionAlert(
+    bankName: string,
+    transactionData: {
+      amount: number
+      recipient: string
+      sender: string
+      balance: number
+      reference: string
+      beneficiaryName: string
+      accountNumber: string
+      description: string
+      transactionType: string
+    },
+    complianceOptions?: {
+      includeRegulatoryDisclaimer?: boolean
+      includeOptOut?: boolean
+    }
+  ): Promise<boolean> {
+    try {
+      const template = await this.getTemplateForBank(bankName)
+      if (!template) {
+        console.warn(`No template found for bank: ${bankName}, using default template`)
+        const defaultTemplate = this.getDefaultTemplates().find(t => t.id === "debit_alert")
+        if (!defaultTemplate) {
+          throw new Error("No default template available")
+        }
+        const message = this.processTemplate(defaultTemplate.content, {
+          amount: transactionData.amount.toString(),
+          recipient: transactionData.recipient,
+          balance: transactionData.balance.toString(),
+          reference: transactionData.reference,
+          time: new Date().toLocaleTimeString(),
+        })
+        
+        return this.sendTransactionAlert({
+          to: transactionData.recipient,
+          message,
+          type: "debit"
+        })
+      }
+      
+      let message = this.processTemplate(template.content, {
+        account_number: transactionData.accountNumber,
+        amount: transactionData.amount.toString(),
+        transaction_type: transactionData.transactionType,
+        beneficiary_name: transactionData.beneficiaryName,
+        description: transactionData.description,
+        balance: transactionData.balance.toString(),
+        reference: transactionData.reference,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+      })
+      
+      if (complianceOptions?.includeRegulatoryDisclaimer) {
+        message += "\n\nThis is a system-generated message. Do not reply."
+      }
+      
+      if (complianceOptions?.includeOptOut) {
+        message += "\nReply STOP to opt out of transaction alerts."
+      }
+      
+      return this.sendTransactionAlert({
+        to: transactionData.recipient,
+        message,
+        type: "debit"
+      })
+    } catch (error) {
+      this.lastError = `Dynamic SMS Service Error: ${error instanceof Error ? error.message : String(error)}`
+      console.error(this.lastError)
+      return false
+    }
+  }
+
+  static async getTemplateForBank(bankName: string): Promise<SMSTemplate | null> {
+    const templates = this.getDefaultTemplates()
+    const bankTemplate = templates.find(template => 
+      template.name.toLowerCase().includes(bankName.toLowerCase())
+    )
+    return bankTemplate || null
+  }
+
+  /**
+   * Get all SMS templates for a specific bank
+   */
+  static getTemplatesForBank(bankName: string): SMSTemplate[] {
+    const templates = this.getDefaultTemplates()
+    return templates.filter(template => 
+      template.name.toLowerCase().includes(bankName.toLowerCase())
+    )
+  }
+
+  /**
+   * Get templates by type (debit, credit, balance, low_balance)
+   */
+  static getTemplatesByType(bankName: string, type: "debit" | "credit" | "balance" | "low_balance"): SMSTemplate | undefined {
+    const bankTemplates = this.getTemplatesForBank(bankName)
+    return bankTemplates.find(t => t.id.includes(type))
+  }
+
+  /**
+   * Get all available banks with their template counts
+   */
+  static getBanksWithTemplates(): Array<{ name: string; type: "bank" | "wallet"; templateCount: number }> {
+    const templates = this.getDefaultTemplates()
+    const bankCounts: Record<string, { type: "bank" | "wallet"; count: number }> = {}
+
+    templates.forEach(template => {
+      const bankName = template.name.split(" - ")[0]
+      const bank = NIGERIAN_BANKS.find(b => b.name === bankName)
+      if (bank && !bankCounts[bank.name]) {
+        bankCounts[bank.name] = { type: bank.type, count: 0 }
+      }
+      if (bankCounts[bankName]) {
+        bankCounts[bankName].count++
+      }
+    })
+
+    return Object.entries(bankCounts).map(([name, data]) => ({
+      name,
+      type: data.type,
+      templateCount: data.count,
+    }))
+  }
+
   static async sendBusinessCard(to: string, card: BusinessCard): Promise<boolean> {
     try {
       const response = await this.retryFetch("/api/sms/business-card", {
@@ -149,32 +273,50 @@ export class SMSService {
   }
 
   static getDefaultTemplates(): SMSTemplate[] {
-    return [
-      {
-        id: "debit_alert",
-        name: "Debit Alert",
-        content:
-          "ECOBANK ALERT: Your account has been debited with NGN{amount} to {recipient}. Available balance: NGN{balance}. Ref: {reference}. Time: {time}",
-        variables: ["amount", "recipient", "balance", "reference", "time"],
+    // Generate templates for all banks and wallets
+    const allTemplates: SMSTemplate[] = []
+    const bankTemplates = getAllSMSTemplates()
+
+    // Create templates for each bank
+    bankTemplates.forEach((bankData, index) => {
+      // Debit alert template
+      allTemplates.push({
+        id: `debit_${bankData.bank.toLowerCase().replace(/\s+/g, "_")}`,
+        name: `${bankData.bank} - Debit Alert`,
+        content: bankData.templates.debit,
+        variables: ["amount", "recipient", "balance", "reference"],
         category: "transaction",
-      },
-      {
-        id: "credit_alert",
-        name: "Credit Alert",
-        content:
-          "ECOBANK ALERT: Your account has been credited with NGN{amount} from {sender}. Available balance: NGN{balance}. Ref: {reference}. Time: {time}",
-        variables: ["amount", "sender", "balance", "reference", "time"],
+      })
+
+      // Credit alert template
+      allTemplates.push({
+        id: `credit_${bankData.bank.toLowerCase().replace(/\s+/g, "_")}`,
+        name: `${bankData.bank} - Credit Alert`,
+        content: bankData.templates.credit,
+        variables: ["amount", "sender", "balance", "reference"],
         category: "transaction",
-      },
-      {
-        id: "welcome_message",
-        name: "Welcome Message",
-        content:
-          "Welcome to Ecobank Mobile Banking, {name}! Your account {account} is now active. Enjoy seamless banking experience.",
-        variables: ["name", "account"],
+      })
+
+      // Balance inquiry template
+      allTemplates.push({
+        id: `balance_${bankData.bank.toLowerCase().replace(/\s+/g, "_")}`,
+        name: `${bankData.bank} - Balance Alert`,
+        content: bankData.templates.balance,
+        variables: ["balance"],
         category: "notification",
-      },
-    ]
+      })
+
+      // Low balance template
+      allTemplates.push({
+        id: `low_balance_${bankData.bank.toLowerCase().replace(/\s+/g, "_")}`,
+        name: `${bankData.bank} - Low Balance Alert`,
+        content: bankData.templates.lowBalance,
+        variables: ["balance"],
+        category: "notification",
+      })
+    })
+
+    return allTemplates
   }
 
   static processTemplate(template: string, variables: Record<string, string>): string {

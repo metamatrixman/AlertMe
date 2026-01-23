@@ -104,14 +104,14 @@ export function BankServiceStatus({ isOpen, onClose }: BankServiceStatusProps) {
     down: wallets.filter((w) => w.status === "down").length,
   }
 
-  const renderServiceList = (services: ServiceStatus[], category: string) => (
+  const renderServiceList = (servicesList: ServiceStatus[], category: string) => (
     <Card className="border-0 shadow-sm bg-white dark:bg-gray-800">
       <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             {category === "bank" ? "🏦 Commercial Banks" : "💳 Digital Wallets"}
             <Badge variant="secondary" className="text-xs">
-              {services.length}
+              {servicesList.length}
             </Badge>
           </CardTitle>
         </div>
@@ -138,7 +138,7 @@ export function BankServiceStatus({ isOpen, onClose }: BankServiceStatusProps) {
       </CardHeader>
       <CardContent className="pt-3 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         <div className="space-y-2">
-          {services.map((service) => (
+          {servicesList.map((service) => (
             <div
               key={service.name + service.type}
               className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-750 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"

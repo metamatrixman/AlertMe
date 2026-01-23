@@ -36,6 +36,7 @@ export const Smartphone = makeComponent("Smartphone");
 export const Building2 = makeComponent("Building2");
 export const Plus = makeComponent("Plus");
 export const CheckCircle = makeComponent("CheckCircle");
+export const XCircle = makeComponent("XCircle");
 export const Sparkles = makeComponent("Sparkles");
 export const Shield = makeComponent("Shield");
 export const Receipt = makeComponent("Receipt");
@@ -88,6 +89,8 @@ export const HelpCircle = makeComponent("HelpCircle");
 export const Archive = makeComponent("Archive");
 export const Wallet = makeComponent("Wallet");
 export const RefreshCw = makeComponent("RefreshCw");
+export const Upload = makeComponent("Upload");
+export const ChevronLeft = makeComponent("ChevronLeft");
 
 // Heroicons used by components/ui/heroicons.tsx
 export const HomeIcon = makeComponent("HomeIcon", "heroicons-solid");
@@ -119,6 +122,7 @@ const All = {
   Building2,
   Plus,
   CheckCircle,
+  XCircle,
   Sparkles,
   Shield,
   Receipt,
@@ -171,6 +175,8 @@ const All = {
   Archive,
   Wallet,
   RefreshCw,
+  Upload,
+  ChevronLeft,
   HomeIcon,
   UserIcon,
   CogIcon,

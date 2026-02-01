@@ -44,6 +44,8 @@ export interface UserData {
   bvn: string
   profilePicture?: string
   status: "Active" | "Inactive"
+  latitude?: number
+  longitude?: number
 }
 
 export interface Notification {

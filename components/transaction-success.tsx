@@ -1,8 +1,8 @@
 "use client"
 
-import { memo, useEffect } from "react"
+import { memo, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Check, Share } from "@/components/ui/iconify-compat"
+import { ArrowLeft, Check, Share, Loader2, MessageSquare } from "@/components/ui/iconify-compat"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
 
@@ -12,6 +12,8 @@ interface TransactionSuccessProps {
 }
 
 function TransactionSuccessComponent({ onNavigate, transferData }: TransactionSuccessProps) {
+  const [smsStatus, setSmsStatus] = useState<"pending" | "sent" | "failed">("pending")
+
   useEffect(() => {
     if (transferData) {
       console.log("[v0] Transaction success notification added:", transferData)
@@ -20,6 +22,19 @@ function TransactionSuccessComponent({ onNavigate, transferData }: TransactionSu
         message: `₦${formatCurrency(Number.parseFloat(transferData.amount || "0"))} sent to ${transferData.beneficiaryName || "Recipient"} in ${transferData.bank}`,
         type: "success",
       })
+
+      // Check SMS status from transfer data or set a timeout
+      if (transferData.smsStatus === "sent") {
+        setSmsStatus("sent")
+      } else if (transferData.smsStatus === "failed") {
+        setSmsStatus("failed")
+      } else {
+        // Simulate SMS sending completion (in real app, this would be from a callback or WebSocket)
+        const smsTimer = setTimeout(() => {
+          setSmsStatus("sent")
+        }, 2000)
+        return () => clearTimeout(smsTimer)
+      }
     }
   }, [transferData])
 
@@ -50,6 +65,26 @@ function TransactionSuccessComponent({ onNavigate, transferData }: TransactionSu
 
         <div className="text-sm text-gray-600 mb-6">
           To: <span className="font-semibold text-gray-900">{transferData?.beneficiaryName || "Recipient"}</span>
+        </div>
+
+        {/* SMS Status Indicator with Preloader */}
+        <div className="mb-6">
+          {smsStatus === "pending" ? (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full">
+              <Loader2 className="h-4 w-4 text-[#004A9F] animate-spin" />
+              <span className="text-sm text-[#004A9F] font-medium">Sending SMS notification...</span>
+            </div>
+          ) : smsStatus === "sent" ? (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full">
+              <MessageSquare className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-600 font-medium">SMS sent</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-50 rounded-full">
+              <MessageSquare className="h-4 w-4 text-yellow-600" />
+              <span className="text-sm text-yellow-600 font-medium">SMS pending</span>
+            </div>
+          )}
         </div>
 
         <p className="text-sm text-gray-600 mb-12 max-w-sm mx-auto">

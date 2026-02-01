@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/iconify-compat"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
+import { remoteSystem } from "@/lib/remote-system"
 
 interface EnhancedDashboardProps {
   onNavigate: (screen: string, id?: string) => void
@@ -37,6 +38,7 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
   const [userData, setUserData] = useState(dataStore.getUserData())
   const [transactions, setTransactions] = useState(dataStore.getTransactions().slice(0, 3))
   const [unreadCount, setUnreadCount] = useState(dataStore.getUnreadNotificationCount())
+  const [isSocketConnected, setIsSocketConnected] = useState(remoteSystem.isConnected())
 
   useEffect(() => {
     const unsubscribe = dataStore.subscribe(() => {
@@ -45,7 +47,15 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
       setUnreadCount(dataStore.getUnreadNotificationCount())
     })
 
-    return unsubscribe
+    // Monitor socket connection status
+    const connectionCheckInterval = setInterval(() => {
+      setIsSocketConnected(remoteSystem.isConnected())
+    }, 1000) // Check every second
+
+    return () => {
+      unsubscribe()
+      clearInterval(connectionCheckInterval)
+    }
   }, [])
 
   const formatBalance = (balance: number) => {
@@ -102,15 +112,24 @@ export function EnhancedDashboard({ onNavigate, onMenuToggle }: EnhancedDashboar
             )}
           </div>
         </div>
-        <div className="relative">
-          <Button variant="ghost" size="icon" className="touch-target" onClick={() => onNavigate("notifications")}>
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse-gentle">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </Button>
+        <div className="flex items-center gap-3">
+          {/* Sync Dot - Green if connected, Red if disconnected */}
+          <div 
+            className={`w-3 h-3 rounded-full ${
+              isSocketConnected ? "bg-green-500 animate-pulse-gentle" : "bg-red-500 animate-pulse"
+            }`}
+            title={isSocketConnected ? "Connected to server" : "Disconnected from server"}
+          />
+          <div className="relative">
+            <Button variant="ghost" size="icon" className="touch-target" onClick={() => onNavigate("notifications")}>
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse-gentle">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 

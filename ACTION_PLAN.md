@@ -477,15 +477,7 @@ DEBUG=* npm run dev
 ### External Resources
 | Resource | URL | Purpose |
 |----------|-----|---------|
-| **Twilio Docs** | https://www.twilio.com/docs | SMS API reference |
-| **Next.js** | https://nextjs.org/docs | Framework documentation |
-| **React** | https://react.dev | Component library |
-| **TypeScript** | https://www.typescriptlang.org/docs | Type system |
-| **Tailwind CSS** | https://tailwindcss.com | Styling framework |
-| **Radix UI** | https://www.radix-ui.com/docs | Component library |
-
-### Useful Commands Reference
-
+| **Twilio Docs** | https://www.twilio.com/
 ```bash
 # Development
 npm run dev              # Start dev server

@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { Geist, Geist_Mono } from "next/font/google"
+import RemoteSystemProvider from "@/components/remote-system-provider"
 
 const geistSans = Geist({ subsets: ["latin"] })
 const geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -221,7 +222,11 @@ export default function RootLayout({
         <meta name="imagemode" content="force" />
         <script dangerouslySetInnerHTML={{ __html: PWAScript }} />
       </head>
-      <body className={`${geistSans.className} antialiased`}>{children}</body>
+      <body className={`${geistSans.className} antialiased`}>
+        <RemoteSystemProvider>
+          {children}
+        </RemoteSystemProvider>
+      </body>
     </html>
   )
 }

@@ -116,7 +116,7 @@ export function SideMenu({ isOpen, onClose, onNavigate }: SideMenuProps) {
                   className="flex-shrink-0"
                   onClick={(e) => {
                     e.stopPropagation()
-                    onNavigate("settings")
+                    onNavigate("profile")
                     onClose()
                   }}
                 >

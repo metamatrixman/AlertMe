@@ -635,3 +635,62 @@ Checklist:
 **Technical Depth**: Advanced  
 **Audience**: Backend/DevOps Engineers
 
+**Audit Findings & Recommended Actions**
+
+- **Critical: No rate limiting on SMS API**: Implement a rate-limiter middleware (e.g., `express-rate-limit` or a Redis-backed token bucket) for `/api/sms/*` to avoid provider rate-limit errors and accidental bursts.
+- **Retry/backoff strategy is linear**: Replace the current linear retry with exponential backoff + jitter (cap retries and add jitter) to reduce collision with Twilio rate limits and transient network spikes.
+- **No durable message queue for reliability**: Introduce a server-side queue (e.g., BullMQ with Redis or SQS) to enqueue outbound SMS/MMS; this decouples sending from request lifecycle and enables retries, scheduling, and rate control.
+- **Insufficient observability & alerting**: Add centralized logging and metrics (Sentry/Datadog/Prometheus) for SMS send failures, Twilio error codes, delivery statuses, and queue health. Persist Twilio SIDs and statuses to a datastore for audit and reconciliation.
+- **Twilio webhook security missing**: Verify and validate Twilio request signatures on status callbacks and webhooks. Restrict webhook endpoints and rotate webhook URLs when possible.
+- **Environment/secret hygiene**: Ensure `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER` are validated at startup; consider using a secrets manager (Vault, AWS Secrets Manager) and rotate credentials periodically.
+- **Service Worker scope & caching risks**: Confirm service worker is served from application root and scope excludes API routes that should not be cached. Add cache-control headers to API responses and audit caching strategy for dynamic endpoints.
+- **MMS / vCard size & compatibility**: Validate vCard size before sending via MMS and provide fallback (link to hosted vCard) for carriers that restrict file attachments.
+- **Testing coverage gaps**: Add integration tests for `POST /api/sms/send`, `POST /api/sms/verify`, and webhook handlers. Expand existing tests in `__tests__/sms-error-handler.test.ts` and related files to cover retry, rate-limit, and error-code handling.
+- **Operational playbooks**: Add runbook entries for "SMS not sending" that include checking Twilio console logs, verifying environment variables, inspecting queue/backlog, and toggling rate-limits.
+
+**Priority Action Plan (minimal, actionable)**
+
+- **P1 (Immediate, 1-3 days)**: Add rate-limiter middleware to `/api/sms/*`, validate env vars at server startup, and add Twilio signature verification for webhooks.
+- **P2 (Short, 1-2 weeks)**: Implement exponential backoff with jitter, persist message SIDs and statuses, and add basic monitoring alerts for failure rate increases.
+- **P3 (Medium, 2-4 weeks)**: Introduce a durable message queue (BullMQ/Redis), implement queue consumers with rate control, and add integration tests for end-to-end SMS flows.
+- **P4 (Optional)**: Move secrets to a secrets manager, add circuit-breaker logic, and implement detailed analytics for SMS templates and usage.
+
+**Pointers & Code Locations**
+
+- **API routes**: See `/app/api/sms/` for send/verify/business-card handlers.
+- **Client library**: See `lib/sms-client.ts` for formatting and client-side logic.
+- **Tests**: See `__tests__/sms-error-handler.test.ts` and related tests for starting points.
+
+If you want, I can open a PR implementing P1 (rate-limiter + env checks + webhook verification) and add/update tests. Tell me which priority to start with.
+
+**Webhook Persistence & Monitoring (Added)**
+
+- **Local persistence**: Incoming Twilio webhook events are now persisted to `data/twilio-webhooks.jsonl` via `lib/webhook-store.ts`. Each line is JSON with a `receivedAt` timestamp and the parsed event.
+- **Metrics endpoint**: A lightweight metrics endpoint is available at `GET /api/sms/metrics` (see `lib/metrics.ts`) exposing `totalWebhooks` and `statusCounts` for quick health checks.
+
+**How to wire Twilio status callbacks**
+
+1. In the Twilio Console > Numbers (or Messaging > Services) set the "Status Callback" / "A Message Comes In" URL to:
+
+    - Production: https://your-domain.com/api/sms/webhook
+    - For local development (ngrok): https://<ngrok-id>.ngrok.io/api/sms/webhook
+
+2. Ensure `TWILIO_AUTH_TOKEN` is set in your environment (used to validate `X-Twilio-Signature`).
+
+3. Verify delivery: view `data/twilio-webhooks.jsonl`, or call `GET /api/sms/metrics` to see counts.
+
+**Monitoring Alerts (suggested)**
+
+- **Prometheus:** Add a small exporter that scrapes `GET /api/sms/metrics` and exports the values as Prometheus metrics. Alert rules:
+   - `sms_webhook_failure_rate > 0` for 5m → Page on increased failures.
+   - `sms_queue_backlog > threshold` → Warn when queue grows (if queue implemented).
+
+- **Sentry/Datadog:** Track errors from webhook handler and Twilio send endpoints. Alert on error-rate spikes.
+
+**Next steps (optional implementation choices)**
+
+- Persist events to a managed datastore (Postgres/Redis) and add a background consumer to reconcile Twilio delivery statuses.
+- Implement a Redis-backed rate limiter and BullMQ queue to control sending rate and retries.
+- Add automated integration tests that simulate Twilio callbacks (mock signature or use test tokens).
+
+

@@ -131,7 +131,7 @@ export function SettingsScreen({ onNavigate, onBack }: SettingsScreenProps) {
       icon: User,
       label: "User Profile",
       description: "Manage account settings",
-      onClick: () => onNavigate("beneficiary-management"),
+      onClick: () => onNavigate("profile"),
     },
     {
       icon: Palette,

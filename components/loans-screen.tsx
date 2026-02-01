@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, CreditCard, Calculator, Home } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
+import { dataStore } from "@/lib/data-store"
+import { remoteSystem } from "@/lib/remote-system"
 
 interface LoansScreenProps {
   onBack: () => void
@@ -68,6 +70,59 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
       return monthlyPayment.toFixed(2)
     }
     return "0.00"
+  }
+
+  const handleApplyLoan = () => {
+    if (!selectedLoanType || !loanAmount || !loanTerm) {
+      console.warn("[Loans] Incomplete loan application form")
+      return
+    }
+
+    const selectedLoan = loanTypes.find((loan) => loan.id === selectedLoanType)
+    if (!selectedLoan) {
+      console.warn("[Loans] Selected loan type not found")
+      return
+    }
+
+    try {
+      // Add the loan application to DataStore
+      const applicationId = dataStore.addLoanApplication({
+        type: selectedLoan.name,
+        amount: Number.parseFloat(loanAmount),
+        term: Number.parseInt(loanTerm),
+        purpose: "User loan request",
+        status: "Submitted",
+        monthlyPayment: Number.parseFloat(calculateMonthlyPayment()),
+        interestRate: Number.parseFloat(selectedLoan.rate.replace("%", "")),
+        totalRepayment: Number.parseFloat(calculateMonthlyPayment()) * Number.parseInt(loanTerm),
+      })
+
+      console.log("[Loans] Loan application submitted with ID:", applicationId)
+
+      // Verify that remoteSystem pushes the update to the server
+      if (remoteSystem.isConnected()) {
+        remoteSystem.pushUpdate({
+          type: "LOAN_APPLICATION_SUBMITTED",
+          loanApplicationId: applicationId,
+          loanData: {
+            type: selectedLoan.name,
+            amount: Number.parseFloat(loanAmount),
+            term: Number.parseInt(loanTerm),
+          },
+          timestamp: new Date().toISOString(),
+        })
+        console.log("[Loans] Loan application update pushed to remote server")
+      } else {
+        console.warn("[Loans] RemoteSystem not connected, update will be synced on reconnection")
+      }
+
+      // Reset form
+      setLoanAmount("")
+      setLoanTerm("")
+      setSelectedLoanType("")
+    } catch (error) {
+      console.error("[Loans] Error submitting loan application:", error)
+    }
   }
 
   return (
@@ -216,7 +271,11 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
         </Card>
 
         {/* Apply Button */}
-        <Button className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3" disabled={!selectedLoanType}>
+        <Button 
+          className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3" 
+          disabled={!selectedLoanType}
+          onClick={handleApplyLoan}
+        >
           Apply for Loan
         </Button>
       </div>

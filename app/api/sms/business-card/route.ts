@@ -1,5 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import twilio from "twilio"
+import { ensureTwilioConfig } from "@/lib/env-check"
+import { rateLimit, requestKeyFromHeaders } from "@/lib/rate-limiter"
+
+ensureTwilioConfig()
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID
 const authToken = process.env.TWILIO_AUTH_TOKEN
@@ -17,6 +21,12 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER
  */
 export async function POST(request: NextRequest) {
   try {
+    const key = requestKeyFromHeaders(request.headers)
+    const rl = rateLimit(key)
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: "Rate limit exceeded" }, { status: 429, headers: { "Retry-After": String(rl.retryAfter || 60) } })
+    }
+
     const body = await request.json()
     const { to, bank, email, phone, mediaUrl } = body
 

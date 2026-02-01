@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Zap, Wifi, Tv, Phone, Car, Home, Receipt } from "@/components/ui/iconify-compat"
+import { ArrowLeft, Zap, Wifi, Tv, Phone, Car, Home, Receipt, AlertCircle } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
+import { dataStore } from "@/lib/data-store"
 
 interface PayBillsScreenProps {
   onBack: () => void
@@ -19,6 +20,9 @@ export function PayBillsScreen({ onBack, onNavigate }: PayBillsScreenProps) {
   const [selectedProvider, setSelectedProvider] = useState("")
   const [customerID, setCustomerID] = useState("")
   const [amount, setAmount] = useState("")
+  const [formError, setFormError] = useState("")
+  const [isProcessing, setIsProcessing] = useState(false)
+  const userData = dataStore.getUserData()
 
   const billCategories = [
     {
@@ -80,6 +84,52 @@ export function PayBillsScreen({ onBack, onNavigate }: PayBillsScreenProps) {
 
   const selectedCategoryData = billCategories.find((cat) => cat.id === selectedCategory)
 
+  // CRITICAL: Handle bill payment with balance validation
+  const handlePayBill = async () => {
+    setFormError("")
+    try {
+      const billAmount = Number(amount)
+      const billFee = 50 // Bill payment fee
+      const totalAmount = billAmount + billFee
+
+      // Validate sufficient balance
+      if (userData.balance < totalAmount) {
+        setFormError(
+          `Insufficient balance. You need ₦${totalAmount.toLocaleString()} (₦${billAmount.toLocaleString()} bill + ₦${billFee} fee). ` +
+          `Current balance: ₦${userData.balance.toLocaleString()}`
+        )
+        return
+      }
+
+      setIsProcessing(true)
+
+      // Add transaction to store
+      await dataStore.addTransaction({
+        type: `${selectedCategory} Bill Payment`,
+        amount: billAmount,
+        recipient: selectedProvider,
+        status: "Successful",
+        description: `${selectedProvider} - ${customerID}`,
+        isDebit: true,
+        section: "Today",
+        recipientBank: selectedCategory,
+        fee: billFee,
+      })
+
+      // Reset form
+      setSelectedCategory("")
+      setSelectedProvider("")
+      setCustomerID("")
+      setAmount("")
+      setIsProcessing(false)
+
+      onNavigate("dashboard")
+    } catch (err) {
+      setIsProcessing(false)
+      setFormError(err instanceof Error ? err.message : "Failed to process bill payment")
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
@@ -94,6 +144,14 @@ export function PayBillsScreen({ onBack, onNavigate }: PayBillsScreenProps) {
       </div>
 
       <div className="px-4 py-6 space-y-6">
+        {/* Error Message */}
+        {formError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-red-700">{formError}</div>
+          </div>
+        )}
+
         {/* Bill Categories */}
         <Card>
           <CardHeader>
@@ -174,11 +232,29 @@ export function PayBillsScreen({ onBack, onNavigate }: PayBillsScreenProps) {
                 />
               </div>
 
+              {amount && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">Bill Amount</span>
+                    <span className="font-semibold">₦{formatCurrency(Number(amount))}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">Bill Fee</span>
+                    <span className="font-semibold">₦50.00</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <span className="text-sm font-bold">Total</span>
+                    <span className="font-bold text-[#004A9F]">₦{formatCurrency(Number(amount) + 50)}</span>
+                  </div>
+                </div>
+              )}
+
               <Button
+                onClick={handlePayBill}
+                disabled={!selectedProvider || !customerID || !amount || isProcessing}
                 className="w-full bg-[#A4D233] hover:bg-[#8BC220] text-black py-3"
-                disabled={!selectedProvider || !customerID || !amount}
               >
-                Pay Bill
+                {isProcessing ? "Processing..." : "Pay Bill"}
               </Button>
             </CardContent>
           </Card>

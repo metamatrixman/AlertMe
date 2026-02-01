@@ -1,5 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import twilio from "twilio"
+import { ensureTwilioConfig } from "@/lib/env-check"
+import { rateLimit, requestKeyFromHeaders } from "@/lib/rate-limiter"
+
+// Validate env on cold start (will warn if missing)fik
+ensureTwilioConfig()
 
 // Initialize Twilio client with environment variables
 const accountSid = process.env.TWILIO_ACCOUNT_SID
@@ -8,6 +13,13 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER
 
 export async function POST(request: NextRequest) {
   try {
+    // Simple in-memory rate limiting (per-IP) — suitable for immediate mitigation only.
+    const key = requestKeyFromHeaders(request.headers)
+    const rl = rateLimit(key)
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: "Rate limit exceeded" }, { status: 429, headers: { "Retry-After": String(rl.retryAfter || 60) } })
+    }
+
     const body = await request.json()
     const { to, message, type } = body
 
@@ -22,6 +34,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if Twilio is configured
+    const isConfigured = accountSid && authToken && twilioPhoneNumber
+    
+    // Demo mode: Simulate SMS sending without actual Twilio
+    const isDemoMode = process.env.SMS_DEMO_MODE === "true" || !isConfigured
+    
+    if (isDemoMode) {
+      // Generate a mock message ID
+      const mockMessageId = `DEMO_${Date.now()}_${Math.random().toString(36).substring(7)}`
+      
+      console.log(`[DEMO MODE] SMS simulated successfully: ${mockMessageId}`)
+      console.log(`[DEMO MODE] To: ${to}, Message: ${message.substring(0, 50)}...`)
+      
+      return NextResponse.json({
+        success: true,
+        messageId: mockMessageId,
+        status: "demo",
+        type: type || "general",
+        demo: true,
+        details: "SMS sent in demo mode (no Twilio credentials configured)"
+      })
+    }
+
     // Validate Twilio credentials
     if (!accountSid || !authToken || !twilioPhoneNumber) {
       console.error("Twilio credentials not configured")
@@ -29,7 +64,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: "SMS service not configured",
-          details: "Twilio credentials are missing or invalid. Please check your environment variables."
+          details: "Twilio credentials are missing or invalid. Please check your environment variables or set SMS_DEMO_MODE=true."
         },
         { status: 500 }
       )

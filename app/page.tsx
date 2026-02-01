@@ -30,6 +30,7 @@ import { VirtualCardsScreen } from "@/components/virtual-cards-screen"
 import { TransferProcessingScreen } from "@/components/transfer-processing-screen"
 import { DetailedReceiptScreen } from "@/components/detailed-receipt-screen"
 import { UpgradeLimitScreen } from "@/components/upgrade-limit-screen"
+import { TransferRouter } from "@/components/transfer-router"
 import { Toaster } from "@/components/ui/toaster"
 import { dataStore } from "@/lib/data-store"
 import { LoanRequirementsChecklist } from "@/components/loan-requirements-checklist"
@@ -129,6 +130,15 @@ export default function Home() {
         return <DetailedReceiptScreen onBack={handleBack} transactionId={transferData} />
       case "upgrade-limit":
         return <UpgradeLimitScreen onBack={handleBack} onNavigate={handleNavigate} />
+      case "ecobank-domestic":
+      case "ecobank-africa":
+      case "other-banks":
+      case "mobile-money":
+      case "international":
+      case "standing-order":
+      case "visa-direct":
+      case "email-sms":
+        return <TransferRouter transferType={currentScreen} onBack={handleBack} onSubmit={(data) => handleNavigate("transfer", data)} />
       default:
         return <EnhancedDashboard onNavigate={handleNavigate} onMenuToggle={handleMenuToggle} />
     }

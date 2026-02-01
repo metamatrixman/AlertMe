@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Loader2, CreditCard, Shield, CheckCircle, AlertCircle } from "@/components/ui/iconify-compat"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
+import { SMSService } from "@/lib/sms-service"
 
 interface TransferProcessingScreenProps {
   onNavigate: (screen: string, data?: any) => void
@@ -57,30 +58,61 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
             // Add transaction
             dataStore
               .addTransaction({
-                type: `Transfer to ${transferData.bank}`,
+                type: `Transfer to ${transferData.bank || transferData.provider || "Recipient"}`,
                 amount: Number.parseFloat(transferData.amount || "0"),
                 recipient: transferData.beneficiaryName || "Recipient",
                 description: `Transfer to ${transferData.beneficiaryName}`,
                 status: "Successful",
                 isDebit: true,
                 section: "Today",
-                recipientBank: transferData.bank,
-                recipientAccount: transferData.accountNumber,
+                recipientBank: transferData.bank || transferData.provider,
+                recipientAccount: transferData.accountNumber || transferData.phoneNumber || transferData.cardNumber,
                 fee: transferData.fee || 30,
               })
-              .then((id) => {
-                console.log("[v0] Transaction added with ID:", id)
-                setTimeout(() => {
-                  onNavigate("transaction-success", {
-                    ...transferData,
-                    id,
-                    beneficiaryName: transferData?.beneficiaryName || "Recipient",
-                    timestamp: new Date().toISOString(),
-                  })
-                }, 500)
+              .then(async (id) => {
+                console.log("[Transfer] Transaction added with ID:", id)
+                
+                // Navigate to success page IMMEDIATELY - don't wait for SMS
+                const successData = {
+                  ...transferData,
+                  id,
+                  beneficiaryName: transferData?.beneficiaryName || "Recipient",
+                  timestamp: new Date().toISOString(),
+                  smsStatus: "pending",
+                }
+                
+                // Send SMS alert CONCURRENTLY in the background - fire and forget
+                const userData = dataStore.getUserData()
+                const amount = Number.parseFloat(transferData.amount || "0")
+                const balance = userData.balance - amount
+                const message = SMSService.generateDebitAlert(
+                  amount,
+                  transferData.beneficiaryName || "Recipient",
+                  balance,
+                  id,
+                  transferData.bank || "ECOBANK"
+                )
+
+                // Send SMS without blocking - handle in background
+                SMSService.sendTransactionAlert({
+                  to: userData.phone,
+                  message,
+                  type: "debit",
+                }).then((smsResult) => {
+                  if (!smsResult) {
+                    // Log error but don't fail transaction - SMS is non-critical
+                    const errorMsg = SMSService.getLastError() || "Unknown SMS error"
+                    console.warn("[Transfer] SMS alert failed:", errorMsg)
+                  }
+                }).catch((err) => {
+                  console.warn("[Transfer] SMS sending error:", err)
+                })
+
+                // Navigate immediately - no delay
+                onNavigate("transaction-success", successData)
               })
               .catch((err) => {
-                console.error("[v0] Failed to add transaction:", err)
+                console.error("[Transfer] Failed to add transaction:", err)
                 setError("Failed to process transaction. Please try again.")
               })
           } catch (err) {

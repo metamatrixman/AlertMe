@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import { Search, Send, X } from "@/components/ui/iconify-compat"
+import { remoteSystem } from "@/lib/remote-system"
 
 interface NetworkChatModalProps {
   isOpen: boolean
@@ -42,6 +43,32 @@ export function NetworkChatModal({ isOpen, onClose }: NetworkChatModalProps) {
     { id: "4", name: "Sarah Wilson", status: "online", type: "user", avatar: "S" },
     { id: "5", name: "David Brown", status: "offline", type: "beneficiary", avatar: "D" },
   ]
+
+  // Listen for admin messages from RemoteSystem
+  useEffect(() => {
+    const handleNewAdminMessage = (event: Event) => {
+      const customEvent = event as CustomEvent
+      const messageText = customEvent.detail?.text || customEvent.detail?.message || "Admin message"
+      
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: "Admin",
+        message: messageText,
+        timestamp: new Date().toLocaleTimeString(),
+      }
+      
+      setChatMessages((prevMessages) => [...prevMessages, newMessage])
+      console.log("[Chat] Received new admin message:", messageText)
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("new-admin-message", handleNewAdminMessage)
+      
+      return () => {
+        window.removeEventListener("new-admin-message", handleNewAdminMessage)
+      }
+    }
+  }, [])
 
   const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()))
 

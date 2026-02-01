@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { Geist, Geist_Mono } from "next/font/google"
 import RemoteSystemProvider from "@/components/remote-system-provider"
+import { StorageInitializer } from "@/components/storage-initializer"
 
 const geistSans = Geist({ subsets: ["latin"] })
 const geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -224,6 +225,7 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.className} antialiased`}>
         <RemoteSystemProvider>
+          <StorageInitializer />
           {children}
         </RemoteSystemProvider>
       </body>

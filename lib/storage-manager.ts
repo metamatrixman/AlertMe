@@ -3,11 +3,25 @@
 /**
  * Enhanced Storage Manager with multiple storage backends
  * Priority: localStorage → IndexedDB → in-memory fallback
+ * 
+ * Storage Discovery:
+ * - App can find storage config at /storage-config.json (cached by service worker)
+ * - IndexedDB: ecobank_db (v1) with object store "app_data"
+ * - LocalStorage: 5-10MB capacity
+ * - Persistent storage: Requested on app initialization
  */
 
 interface EncryptedData {
   encrypted: boolean
   data: string
+}
+
+interface StorageConfig {
+  timestamp: number
+  storageVersion: number
+  dbName: string
+  objectStore: string
+  status: string
 }
 
 export class StorageManager {
@@ -16,6 +30,7 @@ export class StorageManager {
   private static objectStoreName = "app_data"
   private static memoryCache: Map<string, any> = new Map()
   private static db: IDBDatabase | null = null
+  private static storageConfigured = false
 
   private static isStorageAvailable(type: "localStorage" | "indexedDB"): boolean {
     if (type === "localStorage") {
@@ -31,6 +46,20 @@ export class StorageManager {
     return typeof indexedDB !== "undefined"
   }
 
+  static async getStorageConfig(): Promise<StorageConfig | null> {
+    try {
+      const response = await fetch("/storage-config.json")
+      if (response.ok) {
+        const config = await response.json()
+        console.log("[Storage] Storage config loaded from service worker:", config)
+        return config
+      }
+    } catch (error) {
+      console.warn("[Storage] Failed to load storage config:", error)
+    }
+    return null
+  }
+
   static async initIndexedDB(): Promise<void> {
     if (!this.isStorageAvailable("indexedDB") || this.db) return
 
@@ -41,6 +70,8 @@ export class StorageManager {
         request.onerror = () => reject(new Error("Failed to open IndexedDB"))
         request.onsuccess = () => {
           this.db = request.result
+          console.log("[Storage] IndexedDB connection established")
+          this.storageConfigured = true
           resolve()
         }
 
@@ -48,12 +79,45 @@ export class StorageManager {
           const db = event.target.result
           if (!db.objectStoreNames.contains(this.objectStoreName)) {
             db.createObjectStore(this.objectStoreName, { keyPath: "key" })
+            console.log("[Storage] Created object store:", this.objectStoreName)
           }
         }
       })
     } catch (error) {
-      console.warn("IndexedDB initialization failed, falling back to localStorage:", error)
+      console.warn("[Storage] IndexedDB initialization failed, falling back to localStorage:", error)
     }
+  }
+
+  static async initializeStorage(): Promise<void> {
+    try {
+      // Load storage config from service worker cache
+      const config = await this.getStorageConfig()
+      if (config) {
+        console.log("[Storage] Using configuration from service worker", config)
+      }
+
+      // Initialize IndexedDB
+      await this.initIndexedDB()
+
+      // Request persistent storage
+      const isPersistent = await this.requestPersistentStorage()
+
+      // Get and log storage stats
+      const stats = await this.getStorageSize()
+      const percentUsed = stats.quota > 0 ? ((stats.used / stats.quota) * 100).toFixed(2) : "N/A"
+      const quotaMB = stats.quota > 0 ? (stats.quota / 1024 / 1024).toFixed(2) : "N/A"
+
+      console.log("[Storage] Initialization complete:")
+      console.log(`  - Persistent: ${isPersistent}`)
+      console.log(`  - Used: ${percentUsed}% of ${quotaMB}MB`)
+      console.log(`  - Storage location: IndexedDB (${this.dbName}) + localStorage + in-memory cache`)
+    } catch (error) {
+      console.error("[Storage] Initialization failed:", error)
+    }
+  }
+
+  static isStorageReady(): boolean {
+    return this.storageConfigured || this.memoryCache.size > 0
   }
 
   static async save<T>(key: string, data: T, encrypt = false): Promise<void> {

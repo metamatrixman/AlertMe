@@ -1,5 +1,8 @@
 const CACHE_VERSION = "v1.1"
 const CACHE_NAME = `ecobank-express-${CACHE_VERSION}`
+const DB_NAME = "ecobank_db"
+const DB_VERSION = 1
+const OBJECT_STORE_NAME = "app_data"
 
 const STATIC_ASSETS = [
   "/",
@@ -11,14 +14,74 @@ const STATIC_ASSETS = [
   "/apple-icon.png"
 ]
 
-// Install event - cache static assets
+// Initialize IndexedDB during service worker installation
+function initializeIndexedDB() {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === "undefined") {
+      console.warn("[Ecobank Express] IndexedDB not available")
+      reject(new Error("IndexedDB not available"))
+      return
+    }
+
+    const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+    request.onerror = () => {
+      console.error("[Ecobank Express] Failed to open IndexedDB:", request.error)
+      reject(request.error)
+    }
+
+    request.onsuccess = () => {
+      const db = request.result
+      console.log("[Ecobank Express] IndexedDB initialized successfully")
+      resolve(db)
+    }
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result
+      console.log("[Ecobank Express] Setting up IndexedDB schema")
+      
+      if (!db.objectStoreNames.contains(OBJECT_STORE_NAME)) {
+        db.createObjectStore(OBJECT_STORE_NAME, { keyPath: "key" })
+        console.log(`[Ecobank Express] Created object store: ${OBJECT_STORE_NAME}`)
+      }
+    }
+  })
+}
+
+// Store storage initialization info in Cache API for client discovery
+async function cacheStorageConfig() {
+  try {
+    const cache = await caches.open(CACHE_NAME)
+    const config = {
+      timestamp: Date.now(),
+      storageVersion: DB_VERSION,
+      dbName: DB_NAME,
+      objectStore: OBJECT_STORE_NAME,
+      status: "initialized"
+    }
+    const response = new Response(JSON.stringify(config), {
+      headers: { "Content-Type": "application/json" }
+    })
+    await cache.put("/storage-config.json", response)
+    console.log("[Ecobank Express] Storage config cached")
+  } catch (error) {
+    console.warn("[Ecobank Express] Failed to cache storage config:", error)
+  }
+}
+
+// Install event - cache static assets and initialize storage
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.log("[Ecobank Express] Cache addAll error:", err)
+    Promise.all([
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.addAll(STATIC_ASSETS).catch((err) => {
+          console.log("[Ecobank Express] Cache addAll error:", err)
+        })
+      }),
+      initializeIndexedDB().then(() => cacheStorageConfig()).catch((err) => {
+        console.warn("[Ecobank Express] Storage initialization error (non-blocking):", err)
       })
-    }),
+    ])
   )
   self.skipWaiting()
 })

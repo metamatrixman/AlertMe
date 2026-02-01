@@ -16,4 +16,5 @@ import { StorageManager } from "@/lib/storage-manager"
  */
 export function useStorageInit() {
   useEffect(() => {
-    StorageManager.initializeStorage()
+    StorageManager.initializeStorage()  }, [])
+}

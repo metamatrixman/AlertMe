@@ -148,22 +148,13 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
       </div>
 
       <div className="px-4 py-6 space-y-6">
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            onClick={() => onNavigate("loan-application")}
-            className="bg-[#004A9F] hover:bg-[#003875] text-white py-3 flex items-center justify-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            New Application
-          </Button>
-          <Button
-            onClick={() => onNavigate("loan-requirements")}
-            className="bg-[#A4D233] hover:bg-[#8BC220] text-black py-3 flex items-center justify-center gap-2"
-          >
-            <ClipboardList className="h-4 w-4" />
-            Requirements
-          </Button>
-        </div>
+        <Button
+          onClick={() => onNavigate("loan-requirements")}
+          className="w-full bg-[#A4D233] hover:bg-[#8BC220] text-black py-3 flex items-center justify-center gap-2"
+        >
+          <ClipboardList className="h-4 w-4" />
+          Review Loan Requirements
+        </Button>
 
         {/* Loan Applications */}
         {loanApplications.length > 0 && (

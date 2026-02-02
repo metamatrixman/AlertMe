@@ -270,23 +270,15 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
-        <div className="space-y-3">
-          <Button 
-            className="w-full bg-[#A4D233] hover:bg-[#8BC220] text-black py-3" 
-            onClick={() => onNavigate("loan-application")}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Start Full Application
-          </Button>
-          <Button 
-            className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3" 
-            disabled={!selectedLoanType}
-            onClick={handleApplyLoan}
-          >
-            Quick Apply (Selected Type)
-          </Button>
-        </div>
+        {/* Apply Button */}
+        <Button 
+          className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3" 
+          disabled={!selectedLoanType}
+          onClick={handleApplyLoan}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Apply for Loan
+        </Button>
       </div>
     </div>
   )

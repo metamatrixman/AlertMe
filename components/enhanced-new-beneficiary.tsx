@@ -20,19 +20,7 @@ import {
 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
 import { formatCurrency } from "@/lib/form-utils"
-import { NIGERIAN_BANKS } from "@/lib/banks-data"
-
-// Special wallets that use phone number as account number
-const PHONE_BASED_WALLETS = [
-  "Opay",
-  "PalmPay",
-  "Paga",
-  "Kuda Bank",
-  "Fairmoney",
-  "NowNow Digital Systems",
-  "MoMo PSB (MTN)",
-  "MONIPOINT MFB"
-]
+import { NIGERIAN_BANKS, PHONE_BASED_WALLETS } from "@/lib/banks-data"
 
 interface EnhancedNewBeneficiaryProps {
   onBack: () => void

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, CreditCard, Calculator, Home } from "@/components/ui/iconify-compat"
+import { ArrowLeft, CreditCard, Calculator, Home, Plus } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
 import { dataStore } from "@/lib/data-store"
 import { remoteSystem } from "@/lib/remote-system"
@@ -270,14 +270,23 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
           </CardContent>
         </Card>
 
-        {/* Apply Button */}
-        <Button 
-          className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3" 
-          disabled={!selectedLoanType}
-          onClick={handleApplyLoan}
-        >
-          Apply for Loan
-        </Button>
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <Button 
+            className="w-full bg-[#A4D233] hover:bg-[#8BC220] text-black py-3" 
+            onClick={() => onNavigate("loan-application")}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Start Full Application
+          </Button>
+          <Button 
+            className="w-full bg-[#004A9F] hover:bg-[#003875] text-white py-3" 
+            disabled={!selectedLoanType}
+            onClick={handleApplyLoan}
+          >
+            Quick Apply (Selected Type)
+          </Button>
+        </div>
       </div>
     </div>
   )

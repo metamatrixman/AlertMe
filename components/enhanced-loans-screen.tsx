@@ -202,15 +202,26 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
                       <div className="font-medium">{new Date(application.applicationDate).toLocaleDateString()}</div>
                     </div>
                   </div>
-                  {(application.status === "Submitted" || application.status === "Under Review") && (
-                    <Button
-                      onClick={() => setSelectedApplication(application)}
-                      className="w-full bg-[#A4D233] hover:bg-[#8BC220] text-black py-2 text-sm"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Documents
-                    </Button>
-                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    {(application.status === "Submitted" || application.status === "Under Review") && (
+                      <Button
+                        onClick={() => setSelectedApplication(application)}
+                        className="bg-[#A4D233] hover:bg-[#8BC220] text-black py-2 text-sm"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Documents
+                      </Button>
+                    )}
+                    {application.status === "Approved" && (
+                      <Button
+                        onClick={() => onNavigate("loan-agreement")}
+                        className="bg-[#004A9F] hover:bg-[#003875] text-white py-2 text-sm col-span-2"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        View & Sign Agreement
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </CardContent>

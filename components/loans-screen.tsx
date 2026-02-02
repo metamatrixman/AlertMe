@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, CreditCard, Calculator, Home } from "@/components/ui/iconify-compat"
+import { ArrowLeft, CreditCard, Calculator, Home, Plus } from "@/components/ui/iconify-compat"
 import { formatCurrency } from "@/lib/form-utils"
 import { dataStore } from "@/lib/data-store"
 import { remoteSystem } from "@/lib/remote-system"
@@ -276,6 +276,7 @@ export function LoansScreen({ onBack, onNavigate }: LoansScreenProps) {
           disabled={!selectedLoanType}
           onClick={handleApplyLoan}
         >
+          <Plus className="h-4 w-4 mr-2" />
           Apply for Loan
         </Button>
       </div>

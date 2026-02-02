@@ -34,6 +34,7 @@ import { TransferRouter } from "@/components/transfer-router"
 import { Toaster } from "@/components/ui/toaster"
 import { dataStore } from "@/lib/data-store"
 import { LoanRequirementsChecklist } from "@/components/loan-requirements-checklist"
+import { LoanAgreementPage } from "@/components/loan-agreement-page"
 
 export default function Home() {
   useStorageInit()
@@ -110,6 +111,8 @@ export default function Home() {
         return <EnhancedLoansScreen onBack={handleBack} onNavigate={handleNavigate} />
       case "loan-requirements":
         return <LoanRequirementsChecklist onBack={handleBack} />
+      case "loan-agreement":
+        return <LoanAgreementPage onBack={handleBack} loanApplicationId={transferData} />
       case "pay-bills":
         return <PayBillsScreen onBack={handleBack} onNavigate={handleNavigate} />
       case "pos":

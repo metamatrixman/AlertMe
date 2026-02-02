@@ -1,44 +1,76 @@
-/* Utility classes - all Tailwind directives moved to layout.tsx inline styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.text-balance {
-  text-wrap: balance;
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
-.glass-effect {
-  backdrop-filter: blur(12px);
-  background-color: rgba(249, 250, 251, 0.7);
-  border: 1px solid rgba(229, 231, 235, 1);
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.card-shadow {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  position: relative;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.card-shadow-sm {
-  box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.05);
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
-.premium-shadow {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-}
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 
-.gradient-primary {
-  background: linear-gradient(135deg, #004a9f 0%, #0072c6 100%);
-}
+  .glass-effect {
+    backdrop-filter: blur(12px);
+    background-color: rgba(249, 250, 251, 0.7);
+    border: 1px solid rgba(229, 231, 235, 1);
+  }
 
-.gradient-accent {
-  background: linear-gradient(90deg, #a4d233 0%, #8bc220 100%);
-}
+  .card-shadow {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
 
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
-}
+  .card-shadow-sm {
+    box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.05);
+  }
 
-.safe-area-inset-bottom {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
+  .premium-shadow {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  }
 
-.safe-area-inset-top {
-  padding-top: max(1rem, env(safe-area-inset-top));
+  .gradient-primary {
+    background: linear-gradient(135deg, #004a9f 0%, #0072c6 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(90deg, #a4d233 0%, #8bc220 100%);
+  }
+
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-area-inset-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
 }

@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import RemoteSystemProvider from "@/components/remote-system-provider"
 import { StorageInitializer } from "@/components/storage-initializer"
+import "./globals.css"
 
 const geistSans = Geist({ subsets: ["latin"] })
 const geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -220,33 +221,7 @@ export default function RootLayout({
         <meta name="nightmode" content="enable" />
         <meta name="layoutmode" content="fitscreen" />
         <meta name="imagemode" content="force" />
-        <style>{`
-          @tailwind base;
-          @tailwind components;
-          @tailwind utilities;
-          * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-          }
-          html {
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-          body {
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow-x: hidden;
-            position: relative;
-            overscroll-behavior: none;
-            -webkit-overflow-scrolling: touch;
-          }
-          @supports (-webkit-touch-callout: none) {
-            input, select, textarea {
-              font-size: 16px;
-            }
-          }
-        `}</style>
+
         <script dangerouslySetInnerHTML={{ __html: PWAScript }} />
       </head>
       <body className={`${geistSans.className} antialiased`}>

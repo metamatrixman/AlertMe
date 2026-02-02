@@ -12,10 +12,12 @@ import Form, { FormError } from "@/components/ui/form"
 import { nameSchema, amountSchema, getErrorMessage, phoneSchema } from "@/lib/form-utils"
 import { useToast } from "@/hooks/use-toast"
 import { dataStore } from "@/lib/data-store"
+import { getAllWallets } from "@/lib/banks-data"
 
 /**
  * Mobile Money Transfer Form - for transfers to mobile money wallets
  * CBN Compliance: Phone number validation, daily limits, and KYC requirements
+ * Uses comprehensive list from banks-data.ts for consistency
  */
 
 const phoneNumberSchema = z
@@ -39,16 +41,11 @@ interface MobileMoneyTransferFormProps {
   isLoading?: boolean
 }
 
-const MOBILE_MONEY_PROVIDERS = [
-  { name: "Opay", code: "opay" },
-  { name: "PalmPay", code: "palmpay" },
-  { name: "Paga", code: "paga" },
-  { name: "Kuda Bank", code: "kuda" },
-  { name: "Fairmoney", code: "fairmoney" },
-  { name: "MoMo PSB (MTN)", code: "momo" },
-  { name: "MONIPOINT MFB", code: "monipoint" },
-  { name: "NowNow Digital", code: "nownow" },
-]
+// Get all wallets from centralized banks-data.ts for consistency
+const MOBILE_MONEY_PROVIDERS = getAllWallets().map((wallet) => ({
+  name: wallet.name,
+  code: wallet.code,
+}))
 
 export function MobileMoneyTransferForm({ onSubmit, isLoading = false }: MobileMoneyTransferFormProps) {
   const [formError, setFormError] = useState("")

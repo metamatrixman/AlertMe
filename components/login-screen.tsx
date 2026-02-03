@@ -49,15 +49,13 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
       const accountInput = values.accountNumber.trim()
       const pinInput = (values.pin || "").toString().trim()
 
-      if (accountInput === userData.accountNumber && pinInput === "1234") {
+      // Verify account number and PIN against stored user data
+      if (accountInput === userData.accountNumber && pinInput === userData.pin) {
         toast({ title: "Signed in", description: "Welcome back!" })
-        // simulate network delay for demo
-        setTimeout(() => {
-          setIsLoading(false)
-          onLogin()
-        }, 800)
+        setIsLoading(false)
+        onLogin()
       } else {
-        const msg = "Invalid account number or PIN"
+        const msg = "Invalid account number or PIN. Please try again."
         setError(msg)
         toast({ title: "Sign in failed", description: msg, variant: "destructive" })
         setIsLoading(false)
@@ -96,10 +94,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse" />
             </div>
           </div>
-          <div className="text-white/90 text-base font-medium mb-2">The Pan African Bank</div>
-          <div className="text-white/70 text-sm flex items-center justify-center gap-2">
+          <div className="text-white/90 text-sm font-medium mb-2">The Pan African Bank</div>
+          <div className="text-white/70 text-xs flex items-center justify-center gap-2">
             <Shield className="h-4 w-4" />
-            Welcome to Ecobank Mobile!
+            Secure banking at your fingertips
           </div>
         </div>
 
@@ -118,17 +116,20 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             <Form methods={methods} onSubmit={handleLogin}>
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 mb-2 block">Account Number</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-semibold text-gray-700">Account Number</label>
+                    <span className="text-xs text-gray-500">{methods.watch("accountNumber")?.length || 0}/10</span>
+                  </div>
                   <Input
                     type="text"
-                    placeholder="Enter account number"
+                    placeholder="10-digit account number"
                     inputMode="numeric"
                     maxLength={10}
                     pattern="\d{10}"
                     {...methods.register("accountNumber")}
                     className="w-full h-12 rounded-xl border-2 border-gray-200 focus:border-[#004A9F] focus:ring-0 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:border-gray-300"
                     onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "").slice(0,10)
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 10)
                       methods.setValue("accountNumber", val)
                       setError("")
                     }}
@@ -137,11 +138,14 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 mb-2 block">4-Digit PIN</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-semibold text-gray-700">4-Digit PIN</label>
+                    <span className="text-xs text-gray-500">{methods.watch("pin")?.length || 0}/4</span>
+                  </div>
                   <div className="relative">
                     <Input
                       type={showPin ? "text" : "password"}
-                      placeholder="Enter PIN"
+                      placeholder="Enter your 4-digit PIN"
                       {...methods.register("pin")}
                       onChange={handlePinChange}
                       maxLength={4}
@@ -152,13 +156,12 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700 rounded-lg"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
                       onClick={() => setShowPin(!showPin)}
                     >
                       {showPin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
-                  <p className="text-xs text-gray-500">Default PIN for demo: 1234</p>
                 </div>
               </div>
             </Form>
@@ -178,21 +181,21 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               )}
             </Button>
 
-            <div className="text-center space-y-4">
+            <div className="pt-4 space-y-4 border-t border-gray-200">
               <Button
-                variant="link"
-                className="text-[#004A9F] text-sm font-semibold hover:text-[#003875] transition-colors"
+                variant="ghost"
+                className="w-full text-[#004A9F] text-sm font-semibold hover:bg-blue-50 transition-colors"
               >
-                Forgot PIN?
+                Forgot your PIN?
               </Button>
-              <div className="text-xs text-gray-500 flex items-center justify-center gap-1">
-                Don't have an account?{" "}
+              <div className="text-center">
+                <p className="text-xs text-gray-600">Don't have an account?</p>
                 <Button
                   variant="link"
                   onClick={() => setShowRegistration(true)}
-                  className="text-[#004A9F] text-xs p-0 font-semibold hover:text-[#003875] transition-colors"
+                  className="text-[#004A9F] text-sm font-semibold hover:text-[#003875] transition-colors mt-1"
                 >
-                  Register
+                  Create a new account
                 </Button>
               </div>
             </div>

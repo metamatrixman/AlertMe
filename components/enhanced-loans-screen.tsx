@@ -168,8 +168,20 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
             <CardContent className="space-y-3">
               {loanApplications.map((application) => (
                 <div key={application.id} className="p-4 bg-gray-50 rounded-lg space-y-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-medium">{application.type}</div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <div className="font-medium text-base">{application.type}</div>
+                      {application.status === "Submitted" && (
+                        <div className="flex items-center gap-3 mt-2">
+                          <img
+                            src={dataStore.getUserData().profilePicture || "https://via.placeholder.com/40?text=Profile"}
+                            alt="Profile"
+                            className="h-10 w-10 rounded-full object-cover border-2 border-[#004A9F]"
+                          />
+                          <span className="text-xs text-gray-600">Application Submitted</span>
+                        </div>
+                      )}
+                    </div>
                     <Badge
                       className={`${
                         application.status === "Approved"
@@ -202,24 +214,38 @@ export function EnhancedLoansScreen({ onBack, onNavigate }: EnhancedLoansScreenP
                       <div className="font-medium">{new Date(application.applicationDate).toLocaleDateString()}</div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
                     {(application.status === "Submitted" || application.status === "Under Review") && (
-                      <Button
-                        onClick={() => setSelectedApplication(application)}
-                        className="bg-[#A4D233] hover:bg-[#8BC220] text-black py-2 text-sm"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Documents
-                      </Button>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          onClick={() => setSelectedApplication(application)}
+                          className="bg-[#A4D233] hover:bg-[#8BC220] text-black py-2 text-sm"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Document
+                        </Button>
+                        <Button
+                          onClick={() => onNavigate("loan-agreement")}
+                          className="bg-[#004A9F] hover:bg-[#003875] text-white py-2 text-sm"
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Agreement
+                        </Button>
+                      </div>
                     )}
                     {application.status === "Approved" && (
                       <Button
                         onClick={() => onNavigate("loan-agreement")}
-                        className="bg-[#004A9F] hover:bg-[#003875] text-white py-2 text-sm col-span-2"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2 text-sm"
                       >
                         <FileText className="h-4 w-4 mr-2" />
                         View & Sign Agreement
                       </Button>
+                    )}
+                    {application.status === "Under Review" && (
+                      <div className="text-xs text-gray-600 p-2 bg-blue-50 rounded border border-blue-200">
+                        ℹ️ Your application is under review. We'll notify you once a decision is made.
+                      </div>
                     )}
                   </div>
                 </div>

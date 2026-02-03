@@ -31,7 +31,7 @@ export function LoanAgreementPage({ onBack, loanApplicationId }: LoanAgreementPa
       id: "loan-terms",
       title: "Loan Terms & Conditions",
       content:
-        "This Loan Agreement is entered into between the Lender and the Borrower. The Borrower agrees to repay the borrowed amount along with applicable interest rates as specified below. The loan shall be repaid in monthly installments as scheduled. Failure to make timely payments may result in penalties and legal action.",
+        `This Loan Agreement is entered into as of today between Ecobank Nigeria ("the Lender") and ${userData?.name} ("the Borrower"), with account number ${userData?.accountNumber}. The Borrower agrees to repay the borrowed amount of ${formatCurrency(loanApp?.amount || 0)} along with applicable interest rates as specified below. The loan shall be repaid in monthly installments as scheduled. Failure to make timely payments may result in penalties and legal action as permitted by applicable Nigerian banking regulations.`,
     },
     {
       id: "interest-rate",
@@ -160,9 +160,44 @@ export function LoanAgreementPage({ onBack, loanApplicationId }: LoanAgreementPa
           <p className="text-sm text-gray-500">{userData?.email}</p>
         </div>
 
+        {/* Borrower Information Card */}
+        <Card className="mb-8 border-gray-200 shadow-sm bg-blue-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2 text-gray-900">
+              <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-600 text-white rounded-full text-xs font-bold">
+                ℹ
+              </span>
+              Borrower Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Borrower Name</p>
+                <p className="text-sm font-semibold text-gray-900 mt-1">{userData?.name || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Account Number</p>
+                <p className="text-sm font-semibold text-gray-900 mt-1">{userData?.accountNumber || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Phone Number</p>
+                <p className="text-sm font-semibold text-gray-900 mt-1">{userData?.phone || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Email</p>
+                <p className="text-sm font-semibold text-gray-900 mt-1">{userData?.email || "N/A"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Loan Summary Card */}
         <Card className="mb-8 border-gray-200 shadow-sm">
-          <CardContent className="pt-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base text-gray-900">Loan Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Loan Amount</p>
@@ -184,14 +219,25 @@ export function LoanAgreementPage({ onBack, loanApplicationId }: LoanAgreementPa
                   {formatCurrency(loanApp?.monthlyPayment || 0)}
                 </p>
               </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Purpose</p>
+                <p className="text-lg font-semibold text-gray-900 mt-1">{loanApp?.purpose || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Loan Type</p>
+                <p className="text-lg font-semibold text-gray-900 mt-1">{loanApp?.type || "N/A"}</p>
+              </div>
             </div>
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">Total Repayment Amount</span>
-                <span className="text-xl font-bold text-gray-900">
+                <span className="text-2xl font-bold text-[#004A9F]">
                   {formatCurrency(loanApp?.totalRepayment || 0)}
                 </span>
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                This includes principal amount of {formatCurrency(loanApp?.amount || 0)} plus interest
+              </p>
             </div>
           </CardContent>
         </Card>

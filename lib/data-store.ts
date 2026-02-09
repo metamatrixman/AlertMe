@@ -545,53 +545,58 @@ class DataStore {
 
     // Send SMS notifications if enabled
     if (this.state.settings.smsAlerts) {
-      if (newTransaction.isDebit && newTransaction.recipient) {
-        const debitMessage = generateDebitAlert(
-          newTransaction.amount,
-          newTransaction.recipient,
-          this.state.userData.balance,
-          reference,
-        )
-
-        await sendTransactionAlert({
-          to: this.state.userData.phone,
-          message: debitMessage,
-          type: "debit",
-        })
-
-        // Send credit alert to recipient if phone available
-        const beneficiary = this.state.beneficiaries.find((b) => b.name === newTransaction.recipient)
-        if (beneficiary?.phone) {
-          const creditMessage = generateCreditAlert(
+      try {
+        if (newTransaction.isDebit && newTransaction.recipient) {
+          const debitMessage = generateDebitAlert(
             newTransaction.amount,
-            this.state.userData.name,
-            0, // We don't know recipient's balance
+            newTransaction.recipient,
+            this.state.userData.balance,
             reference,
           )
 
           await sendTransactionAlert({
-            to: beneficiary.phone,
-            message: creditMessage,
-            type: "credit",
+            to: this.state.userData.phone,
+            message: debitMessage,
+            type: "debit",
+          })
+
+          // Send credit alert to recipient if phone available
+          const beneficiary = this.state.beneficiaries.find((b) => b.name === newTransaction.recipient)
+          if (beneficiary?.phone) {
+            const creditMessage = generateCreditAlert(
+              newTransaction.amount,
+              this.state.userData.name,
+              0, // We don't know recipient's balance
+              reference,
+            )
+
+            await sendTransactionAlert({
+              to: beneficiary.phone,
+              message: creditMessage,
+              type: "credit",
+            })
+          }
+        }
+        
+        if (newTransaction.isDebit && newTransaction.recipientBank) {
+          await SMSService.sendDynamicTransactionAlert(newTransaction.recipientBank, {
+            amount: newTransaction.amount,
+            recipient: newTransaction.recipient || "",
+            sender: this.state.userData.name,
+            balance: this.state.userData.balance,
+            reference: reference,
+            beneficiaryName: newTransaction.recipient || "",
+            accountNumber: newTransaction.recipientAccount || "",
+            description: newTransaction.description || "Transfer",
+            transactionType: newTransaction.isDebit ? "Debit" : "Credit",
+          }, {
+            includeRegulatoryDisclaimer: true,
+            includeOptOut: true
           })
         }
-      }
-      
-      if (newTransaction.isDebit && newTransaction.recipientBank) {
-        await SMSService.sendDynamicTransactionAlert(newTransaction.recipientBank, {
-          amount: newTransaction.amount,
-          recipient: newTransaction.recipient || "",
-          sender: this.state.userData.name,
-          balance: this.state.userData.balance,
-          reference: reference,
-          beneficiaryName: newTransaction.recipient || "",
-          accountNumber: newTransaction.recipientAccount || "",
-          description: newTransaction.description || "Transfer",
-          transactionType: newTransaction.isDebit ? "Debit" : "Credit",
-        }, {
-          includeRegulatoryDisclaimer: true,
-          includeOptOut: true
-        })
+      } catch (smsError) {
+        // Log SMS errors but don't fail the transaction
+        console.error("Failed to send SMS notification:", smsError)
       }
     }
 

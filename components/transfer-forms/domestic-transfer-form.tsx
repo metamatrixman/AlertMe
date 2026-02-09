@@ -158,8 +158,8 @@ export function DomesticTransferForm({ onSubmit, isLoading = false }: DomesticTr
               <SelectValue placeholder="Select bank" />
             </SelectTrigger>
             <SelectContent className="max-h-60">
-              {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
-                <SelectItem key={bank.code} value={bank.name}>
+              {NIGERIAN_BANKS.map((bank) => (
+                <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name}>
                   {bank.name}
                 </SelectItem>
               ))}

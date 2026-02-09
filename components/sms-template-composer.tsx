@@ -442,7 +442,7 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
                     <SelectContent className="max-h-60">
                       <SelectItem value="all">All Institutions</SelectItem>
                       {NIGERIAN_BANKS.map((bank) => (
-                        <SelectItem key={bank.code} value={bank.name}>
+                        <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name}>
                           {bank.name}
                         </SelectItem>
                       ))}
@@ -574,7 +574,7 @@ export function SMSTemplateComposer({ onBack }: SMSTemplateComposerProps) {
                     </SelectTrigger>
                     <SelectContent className="max-h-60">
                       {NIGERIAN_BANKS.map((bank) => (
-                        <SelectItem key={bank.code} value={bank.name}>
+                        <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name}>
                           {bank.name}
                         </SelectItem>
                       ))}

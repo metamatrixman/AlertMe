@@ -239,15 +239,23 @@ export function EnhancedNewBeneficiary({ onBack, onContinue }: EnhancedNewBenefi
                 Traditional Banks
               </div>
               {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
-                <SelectItem key={bank.code} value={bank.name} className="hover:bg-blue-50/50 rounded-lg mx-1">
+                <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name} className="hover:bg-blue-50/50 rounded-lg mx-1">
+                  {bank.name}
+                </SelectItem>
+              ))}
+              <div className="px-3 py-2 text-xs font-bold text-gray-500 bg-gradient-to-r from-purple-50 to-pink-50 sticky top-0 mt-2">
+                Microfinance Banks
+              </div>
+              {NIGERIAN_BANKS.filter((bank) => bank.type === "microfinance").map((bank) => (
+                <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name} className="hover:bg-purple-50/50 rounded-lg mx-1">
                   {bank.name}
                 </SelectItem>
               ))}
               <div className="px-3 py-2 text-xs font-bold text-gray-500 bg-gradient-to-r from-green-50 to-blue-50 sticky top-0 mt-2">
-                Digital Wallets
+                Digital Wallets & Payment Platforms
               </div>
               {NIGERIAN_BANKS.filter((bank) => bank.type === "wallet").map((bank) => (
-                <SelectItem key={bank.code} value={bank.name} className="hover:bg-green-50/50 rounded-lg mx-1">
+                <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name} className="hover:bg-green-50/50 rounded-lg mx-1">
                   {bank.name}
                 </SelectItem>
               ))}

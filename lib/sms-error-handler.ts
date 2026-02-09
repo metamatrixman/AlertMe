@@ -82,6 +82,16 @@ export function categorizeSMSError(error: any): SMSError {
     }
   }
 
+  // Delivery failures (check before recipient to catch compound errors)
+  if (originalError.message.includes("delivery") || originalError.message.includes("failed")) {
+    return {
+      type: SMSErrorType.DELIVERY_FAILED,
+      message: ERROR_MESSAGES[SMSErrorType.DELIVERY_FAILED],
+      originalError,
+      retryable: true,
+    }
+  }
+
   // Recipient validation
   if (originalError.message.includes("recipient") || originalError.message.includes("verify")) {
     return {
@@ -89,16 +99,6 @@ export function categorizeSMSError(error: any): SMSError {
       message: ERROR_MESSAGES[SMSErrorType.INVALID_RECIPIENT],
       originalError,
       retryable: false,
-    }
-  }
-
-  // Delivery failures
-  if (originalError.message.includes("delivery") || originalError.message.includes("failed")) {
-    return {
-      type: SMSErrorType.DELIVERY_FAILED,
-      message: ERROR_MESSAGES[SMSErrorType.DELIVERY_FAILED],
-      originalError,
-      retryable: true,
     }
   }
 

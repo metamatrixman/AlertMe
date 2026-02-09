@@ -21,13 +21,15 @@ export async function sendTransactionAlert(alert: SMSAlert): Promise<void> {
     const responseText = await response.text()
     
     if (!response.ok) {
-      console.error(`❌ SMS API Error (Status ${response.status}):`)
+      console.warn(`❌ SMS API Error (Status ${response.status}):`)
       try {
         const errorData = JSON.parse(responseText)
-        console.error(`   Message: ${errorData.error || 'Unknown error'}`)
+        console.warn(`   Message: ${errorData.error || 'Unknown error'}`)
+        console.warn(`   Details: ${errorData.details || ''}`)
       } catch {
-        console.error(`   Response: ${responseText || 'Empty response'}`)
+        console.warn(`   Response: ${responseText || 'Empty response'}`)
       }
+      // Don't throw - SMS is non-critical, log and continue
       return
     }
 
@@ -37,14 +39,18 @@ export async function sendTransactionAlert(alert: SMSAlert): Promise<void> {
         console.log(`✅ SMS Alert [${alert.type.toUpperCase()}] sent successfully:`)
         console.log(`   To: ${alert.to}`)
         console.log(`   Message ID: ${result.messageId}`)
+        if (result.demo) {
+          console.log(`   (Demo Mode)`)
+        }
       } else {
         console.error(`❌ SMS Alert [${alert.type.toUpperCase()}] failed: ${result.error}`)
       }
-    } catch (parseError) {
-      console.error(`❌ SMS Client Error: Failed to parse API response:`, parseError)
-      console.error(`   Raw Response: ${responseText}`)
+      } catch (parseError) {
+      console.warn(`❌ SMS Client Error: Failed to parse API response:`, parseError)
+      console.warn(`   Raw Response: ${responseText}`)
     }
   } catch (error) {
-    console.error(`❌ SMS Service Exception:`, error)
+    console.warn(`❌ SMS Service Exception:`, error)
+    // Don't rethrow - SMS is non-critical. The transaction should continue even if SMS fails
   }
 }

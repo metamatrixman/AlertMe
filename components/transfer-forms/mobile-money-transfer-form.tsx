@@ -12,6 +12,7 @@ import Form, { FormError } from "@/components/ui/form"
 import { nameSchema, amountSchema, getErrorMessage, phoneSchema } from "@/lib/form-utils"
 import { useToast } from "@/hooks/use-toast"
 import { dataStore } from "@/lib/data-store"
+import { NIGERIAN_BANKS } from "@/lib/banks-data"
 
 /**
  * Mobile Money Transfer Form - for transfers to mobile money wallets
@@ -39,16 +40,12 @@ interface MobileMoneyTransferFormProps {
   isLoading?: boolean
 }
 
-const MOBILE_MONEY_PROVIDERS = [
-  { name: "Opay", code: "opay" },
-  { name: "PalmPay", code: "palmpay" },
-  { name: "Paga", code: "paga" },
-  { name: "Kuda Bank", code: "kuda" },
-  { name: "Fairmoney", code: "fairmoney" },
-  { name: "MoMo PSB (MTN)", code: "momo" },
-  { name: "MONIPOINT MFB", code: "monipoint" },
-  { name: "NowNow Digital", code: "nownow" },
-]
+/**
+ * Get all mobile money and wallet providers from NIGERIAN_BANKS
+ */
+const getMobileMoneyProviders = () => {
+  return NIGERIAN_BANKS.filter((bank) => bank.type === "wallet" || bank.type === "microfinance")
+}
 
 export function MobileMoneyTransferForm({ onSubmit, isLoading = false }: MobileMoneyTransferFormProps) {
   const [formError, setFormError] = useState("")
@@ -169,8 +166,8 @@ export function MobileMoneyTransferForm({ onSubmit, isLoading = false }: MobileM
             <SelectTrigger className={"bg-white " + ((formState.errors as any).provider ? "border-red-500" : "")}>
               <SelectValue placeholder="Select provider" />
             </SelectTrigger>
-            <SelectContent>
-              {MOBILE_MONEY_PROVIDERS.map((provider) => (
+            <SelectContent className="max-h-60">
+              {getMobileMoneyProviders().map((provider) => (
                 <SelectItem key={provider.code} value={provider.name}>
                   {provider.name}
                 </SelectItem>

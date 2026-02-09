@@ -78,18 +78,34 @@ export const NIGERIAN_BANKS: BankData[] = [
   { name: "Standard Chartered Bank (International)", code: "068", type: "international", description: "International Bank" },
   { name: "Stanbic IBTC Bank (International)", code: "221", type: "international", description: "International Bank" },
 
-  // DIGITAL WALLETS & PAYMENT PLATFORMS (20+ platforms)
+  // DIGITAL WALLETS & PAYMENT PLATFORMS (30+ platforms)
   { name: "Opay", code: "999992", type: "wallet", description: "Digital Wallet & Payment Platform" },
   { name: "PalmPay", code: "999991", type: "wallet", description: "Digital Wallet & Payment Platform" },
+  { name: "Moniepoint", code: "999995", type: "wallet", description: "POS & Payment Platform" },
   { name: "NowNow Digital Systems", code: "999993", type: "wallet", description: "Digital Wallet Platform" },
   { name: "MoMo PSB (MTN Mobile Money)", code: "999994", type: "wallet", description: "Mobile Money Platform" },
   { name: "Paystack", code: "090328", type: "wallet", description: "Payment Platform" },
   { name: "Flutterwave", code: "090315", type: "wallet", description: "Payment Platform" },
   { name: "Interswitch", code: "090229", type: "wallet", description: "Payment Platform" },
+  { name: "eTranzact", code: "090230", type: "wallet", description: "Payment Platform" },
+  { name: "SureRemit", code: "090231", type: "wallet", description: "Remittance Platform" },
   { name: "PiggyVest", code: "090317", type: "wallet", description: "Fintech Savings Platform" },
   { name: "Cowrywise", code: "090360", type: "wallet", description: "Investment Platform" },
-
-  // Add utility for filtering
+  
+  // BANKING SERVICES (Mobile & Online Banking Platforms)
+  { name: "First Bank Online", code: "011", type: "bank", description: "First Bank Online Banking" },
+  { name: "Zenith Bank e-Banking", code: "057", type: "bank", description: "Zenith Bank e-Banking" },
+  { name: "GTBank Mobile Banking", code: "058", type: "bank", description: "GTBank Mobile Banking" },
+  { name: "Access Mobile", code: "044", type: "bank", description: "Access Bank Mobile Banking" },
+  { name: "U-Mobile", code: "033", type: "bank", description: "UBA Mobile Banking" },
+  { name: "Sterling Mobile", code: "232", type: "bank", description: "Sterling Bank Mobile Banking" },
+  { name: "Fidelity Mobile", code: "070", type: "bank", description: "Fidelity Bank Mobile Banking" },
+  { name: "Stanbic Mobile", code: "221", type: "bank", description: "Stanbic IBTC Mobile Banking" },
+  { name: "Ecobank Mobile", code: "050", type: "bank", description: "Ecobank Mobile Banking" },
+  { name: "Union Mobile", code: "032", type: "bank", description: "Union Bank Mobile Banking" },
+  { name: "Keystone Mobile", code: "082", type: "bank", description: "Keystone Bank Mobile Banking" },
+  { name: "Standard Chartered Online", code: "068", type: "bank", description: "Standard Chartered Online Banking" },
+  { name: "Citibank Online", code: "023", type: "bank", description: "Citibank Online Banking" },
 ]
 
 /**

@@ -32,32 +32,41 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
 
     console.log("[v0] Transfer processing started with data:", transferData)
 
+    // Single timer that updates progress and steps. Avoid including `progress` in deps
+    // to prevent recreating the effect on every progress change which caused duplicate
+    // transaction submissions (multiple overlapping timers).
     const timer = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
+        const next = Math.min(prev + 2, 100)
+
+        // Update visual step based on next progress
+        setCurrentStep(() => {
+          const stepIndex = Math.min(steps.length - 1, Math.floor(next / (100 / steps.length)))
+          return stepIndex
+        })
+
+        if (next >= 100) {
           clearInterval(timer)
           setIsProcessing(false)
 
-          try {
-            // Save beneficiary if requested
-            if (transferData.saveAsBeneficiary) {
-              try {
-                dataStore.addBeneficiary({
-                  name: transferData.beneficiaryName || "Recipient",
-                  bank: transferData.bank,
-                  accountNumber: transferData.accountNumber,
-                  phone: transferData.phone || "",
-                })
-                console.log("[v0] Beneficiary saved successfully")
-              } catch (err) {
-                console.warn("[v0] Failed to save beneficiary:", err)
-                // Don't fail the transaction if beneficiary save fails
+          // Perform transaction flow once when progress completes
+          ;(async () => {
+            try {
+              if (transferData.saveAsBeneficiary) {
+                try {
+                  dataStore.addBeneficiary({
+                    name: transferData.beneficiaryName || "Recipient",
+                    bank: transferData.bank,
+                    accountNumber: transferData.accountNumber,
+                    phone: transferData.phone || "",
+                  })
+                  console.log("[v0] Beneficiary saved successfully")
+                } catch (err) {
+                  console.warn("[v0] Failed to save beneficiary:", err)
+                }
               }
-            }
 
-            // Add transaction
-            dataStore
-              .addTransaction({
+              const id = await dataStore.addTransaction({
                 type: `Transfer to ${transferData.bank || transferData.provider || "Recipient"}`,
                 amount: Number.parseFloat(transferData.amount || "0"),
                 recipient: transferData.beneficiaryName || "Recipient",
@@ -69,19 +78,19 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
                 recipientAccount: transferData.accountNumber || transferData.phoneNumber || transferData.cardNumber,
                 fee: transferData.fee || 30,
               })
-              .then(async (id) => {
-                console.log("[Transfer] Transaction added with ID:", id)
-                
-                // Navigate to success page IMMEDIATELY - don't wait for SMS
-                const successData = {
-                  ...transferData,
-                  id,
-                  beneficiaryName: transferData?.beneficiaryName || "Recipient",
-                  timestamp: new Date().toISOString(),
-                  smsStatus: "pending",
-                }
-                
-                // Send SMS alert CONCURRENTLY in the background - fire and forget
+
+              console.log("[Transfer] Transaction added with ID:", id)
+
+              const successData = {
+                ...transferData,
+                id,
+                beneficiaryName: transferData?.beneficiaryName || "Recipient",
+                timestamp: new Date().toISOString(),
+                smsStatus: "pending",
+              }
+
+              // Fire-and-forget SMS notification
+              try {
                 const userData = dataStore.getUserData()
                 const amount = Number.parseFloat(transferData.amount || "0")
                 const balance = userData.balance - amount
@@ -90,56 +99,36 @@ export function TransferProcessingScreen({ onNavigate, transferData }: TransferP
                   transferData.beneficiaryName || "Recipient",
                   balance,
                   id,
-                  transferData.bank || "ECOBANK"
+                  transferData.bank || "ECOBANK",
                 )
 
-                // Send SMS without blocking - handle in background
-                SMSService.sendTransactionAlert({
-                  to: userData.phone,
-                  message,
-                  type: "debit",
-                }).then((smsResult) => {
-                  if (!smsResult) {
-                    // Log error but don't fail transaction - SMS is non-critical
-                    const errorMsg = SMSService.getLastError() || "Unknown SMS error"
-                    console.warn("[Transfer] SMS alert failed:", errorMsg)
-                  }
-                }).catch((err) => {
-                  console.warn("[Transfer] SMS sending error:", err)
-                })
+                SMSService.sendTransactionAlert({ to: userData.phone, message, type: "debit" })
+                  .then((smsResult) => {
+                    if (!smsResult) {
+                      console.warn("[Transfer] SMS alert failed:", SMSService.getLastError() || "Unknown SMS error")
+                    }
+                  })
+                  .catch((err) => console.warn("[Transfer] SMS sending error:", err))
+              } catch (smsErr) {
+                console.warn("[Transfer] SMS background error:", smsErr)
+              }
 
-                // Navigate immediately - no delay
-                onNavigate("transaction-success", successData)
-              })
-              .catch((err) => {
-                console.error("[Transfer] Failed to add transaction:", err)
-                setError("Failed to process transaction. Please try again.")
-              })
-          } catch (err) {
-            console.error("[v0] Transaction processing error:", err)
-            setError("An error occurred during processing")
-          }
-          return 100
+              onNavigate("transaction-success", successData)
+            } catch (err) {
+              console.error("[Transfer] Failed to add transaction:", err)
+              setError("Failed to process transaction. Please try again.")
+            }
+          })()
         }
-        return prev + 2
+
+        return next
       })
     }, 100)
 
-    // Update steps based on progress
-    const stepTimer = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev < steps.length - 1 && progress > (prev + 1) * 33) {
-          return prev + 1
-        }
-        return prev
-      })
-    }, 1000)
-
     return () => {
       clearInterval(timer)
-      clearInterval(stepTimer)
     }
-  }, [onNavigate, progress, steps.length, transferData])
+  }, [onNavigate, transferData])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

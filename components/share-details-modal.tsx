@@ -120,7 +120,7 @@ export function ShareDetailsModal({ isOpen, onClose, recipientPhone }: ShareDeta
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {NIGERIAN_BANKS.map((bank) => (
-                <option key={bank.code} value={bank.name}>
+                <option key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name}>
                   {bank.name}
                 </option>
               ))}

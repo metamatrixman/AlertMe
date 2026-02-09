@@ -199,15 +199,23 @@ export function NewBeneficiary({ onBack, onNavigate }: NewBeneficiaryProps) {
                 <SelectContent className="max-h-60">
                   <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50">Traditional Banks</div>
                   {NIGERIAN_BANKS.filter((bank) => bank.type === "bank").map((bank) => (
-                    <SelectItem key={bank.code} value={bank.name}>
+                    <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name}>
                       {bank.name}
                     </SelectItem>
                   ))}
                   <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50 mt-2">
-                    Digital Wallets & Fintech
+                    Microfinance Banks
+                  </div>
+                  {NIGERIAN_BANKS.filter((bank) => bank.type === "microfinance").map((bank) => (
+                    <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name}>
+                      {bank.name}
+                    </SelectItem>
+                  ))}
+                  <div className="px-3 py-2 text-xs font-bold text-gray-500 sticky top-0 bg-gray-50 mt-2">
+                    Digital Wallets & Payment Platforms
                   </div>
                   {NIGERIAN_BANKS.filter((bank) => bank.type === "wallet").map((bank) => (
-                    <SelectItem key={bank.code} value={bank.name}>
+                    <SelectItem key={`${bank.code}-${bank.type}-${bank.name}`} value={bank.name}>
                       {bank.name}
                     </SelectItem>
                   ))}
